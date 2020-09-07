@@ -8,27 +8,26 @@ import (
 )
 
 func main() {
-	log.Info("Starting SC-420")
+	log.Info("Starting MT-420")
 
 	s := fluidsynth2.NewSettings()
 	synth := fluidsynth2.NewSynth(s)
-	i := synth.SFLoad("files/SC-55.sf2", false)
+	synth.SFLoad("files/SC-55.sf2", false)
 
 	player := fluidsynth2.NewPlayer(synth)
-	//fmt.Println(player.Add("files/be_sharp_bw_redfarn.mid"))
-	dat, err := ioutil.ReadFile("files/be_sharp_bw_redfarn.mid")
+
+	dat, err := ioutil.ReadFile("files/passport.mid")
 	if err != nil {
 		panic(err)
 	}
 
 	player.AddMem(dat)
 
-	s.SetString("audio.driver", "coreaudio")
+	// Easy way to set audio backend
+	//s.SetString("audio.driver", "coreaudio")
 
-	adriver := fluidsynth2.NewAudioDriver(s, synth)
-	_ = adriver
+	fluidsynth2.NewAudioDriver(s, synth)
 
 	player.Play()
 	player.Join()
-
 }
