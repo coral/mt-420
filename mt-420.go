@@ -16,7 +16,7 @@ func main() {
 
 	player := fluidsynth2.NewPlayer(synth)
 
-	dat, err := ioutil.ReadFile("files/passport.mid")
+	dat, err := ioutil.ReadFile("files/NEIL_YOUNG_-_Rockin_in_the_free_world.mid")
 	if err != nil {
 		panic(err)
 	}
