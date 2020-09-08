@@ -1,33 +1,34 @@
 package main
 
 import (
-	"io/ioutil"
-
-	"github.com/coral/fluidsynth2"
+	"github.com/coral/mt-420/floppy"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
 	log.Info("Starting MT-420")
 
-	s := fluidsynth2.NewSettings()
-	synth := fluidsynth2.NewSynth(s)
-	synth.SFLoad("files/SC-55.sf2", false)
+	fl := floppy.New("/dev/fd0", "/media/floppy")
+	fl.Watch()
 
-	player := fluidsynth2.NewPlayer(synth)
+	// s := fluidsynth2.NewSettings()
+	// synth := fluidsynth2.NewSynth(s)
+	// synth.SFLoad("files/SC-55.sf2", false)
 
-	dat, err := ioutil.ReadFile("files/NEIL_YOUNG_-_Rockin_in_the_free_world.mid")
-	if err != nil {
-		panic(err)
-	}
+	// player := fluidsynth2.NewPlayer(synth)
 
-	player.AddMem(dat)
+	// dat, err := ioutil.ReadFile("files/passport.mid")
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	// Easy way to set audio backend
-	//s.SetString("audio.driver", "coreaudio")
+	// player.AddMem(dat)
 
-	fluidsynth2.NewAudioDriver(s, synth)
+	// // Easy way to set audio backend
+	// //s.SetString("audio.driver", "coreaudio")
 
-	player.Play()
-	player.Join()
+	// fluidsynth2.NewAudioDriver(s, synth)
+
+	// player.Play()
+	// player.Join()
 }
