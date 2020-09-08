@@ -11,7 +11,7 @@ import (
 type Disk struct {
 	device     string
 	mountpoint string
-	fileindex  []os.FileInfo
+	FileIndex  []os.FileInfo
 }
 
 func New(device string, mountpoint string) *Disk {
@@ -40,9 +40,9 @@ func (d *Disk) indexDisk() {
 		log.Fatal(err)
 	}
 
-	d.fileindex = files
+	d.FileIndex = files
 
-	for _, file := range d.fileindex {
+	for _, file := range d.FileIndex {
 		fmt.Println(file.Name())
 	}
 }
