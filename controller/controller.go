@@ -7,6 +7,10 @@ import (
 	"github.com/coral/mt-420/player"
 )
 
+var Options = map[string]Option{
+	"status": &Status{},
+}
+
 type Controller struct {
 	player  *player.Player
 	panel   *panel.Panel
@@ -22,23 +26,30 @@ func New(player *player.Player, panel *panel.Panel, floppy *floppy.Disk, l *lcd.
 		panel:   panel,
 		floppy:  floppy,
 		display: l,
+		state:   "status",
 	}
 }
 
 func (c *Controller) Start() {
 
-	//c.display.RenderList([]string{"passport.mid", "pepega.mid", "super-fighta.mid", "denis.mid"}, 2)
-	c.display.RenderStatus(
-		lcd.StatusScreen{
-			Title:    "passport.mid",
-			Tempo:    c.player.GetBPM(),
-			Volume:   "100%",
-			Progress: 50,
-		},
-	)
+	for {
+		e := c.panel.GetEvents()
 
-	c.player.Play("files/passport.mid")
-	c.player.Wait()
+	}
+
+	//c.display.RenderList([]string{"passport.mid", "pepega.mid", "super-fighta.mid", "denis.mid"}, 2)
+	// c.display.RenderStatus(
+	// 	lcd.StatusScreen{
+	// 		Title:    "passport.mid",
+	// 		Tempo:    c.player.GetBPM(),
+	// 		Volume:   "100%",
+	// 		Progress: 50,
+	// 	},
+	// )
+
+	// c.player.Play("files/passport.mid")
+	// c.player.Wait()
+
 }
 
 func (c *Controller) handleEvents() {

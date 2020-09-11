@@ -3,6 +3,7 @@ package main
 import (
 	"io"
 	"os"
+	"time"
 
 	"github.com/coral/mt-420/controller"
 	"github.com/coral/mt-420/floppy"
@@ -24,11 +25,14 @@ func (e ErrorShim) Write(data []byte) (n int, err error) {
 }
 
 func main() {
+	delay := 0
+
 	log := logrus.New()
 	log.SetLevel(logrus.WarnLevel)
 
 	//LCD
 	display := lcd.New(true, log)
+	delayWriter("Starting MT-420", delay, display)
 
 	ersh := ErrorShim{
 		lcd: display,
@@ -36,8 +40,7 @@ func main() {
 	mw := io.MultiWriter(os.Stdout, ersh)
 	log.SetOutput(mw)
 
-	display.Message("Starting MT-420")
-
+	delayWriter("Connecting to panel", delay, display)
 	// Panel
 	panel := panel.New("/dev/cu.usbmodem14444301", log)
 	err := panel.Init()
@@ -46,7 +49,7 @@ func main() {
 	}
 
 	panel.AddButton("play", 2)
-	panel.AddButton("stop", 3)
+	panel.AddButton("escape", 3)
 
 	// events := panel.GetEvents()
 	// go func() {
@@ -56,6 +59,7 @@ func main() {
 	// 	}
 	// }()
 
+	delayWriter("Loading Fluidsynth", delay, display)
 	//Player
 	p, err := player.New(player.Configuration{
 		SoundFont:    "files/SC-55.sf2",
@@ -66,6 +70,7 @@ func main() {
 		panic(err)
 	}
 
+	delayWriter("Warming up floppy", delay, display)
 	//Floppy
 	fl := floppy.New("/dev/fd0", "/media/floppy")
 
@@ -73,4 +78,10 @@ func main() {
 	controller := controller.New(p, panel, fl, display)
 	controller.Start()
 
+}
+
+func delayWriter(message string, delay int, l *lcd.LCD) {
+	m := time.Duration(delay)
+	l.Message(message)
+	time.Sleep(m * time.Second)
 }
