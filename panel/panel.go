@@ -1,6 +1,8 @@
 package panel
 
 import (
+	"fmt"
+
 	"github.com/baol/go-firmata"
 	"github.com/sirupsen/logrus"
 )
@@ -15,12 +17,26 @@ type Panel struct {
 
 type Layout struct {
 	Buttons map[uint]Button
+	LEDs    map[string]LED
+	RGB     map[string]RGBLED
 }
 
 type Button struct {
 	Name  string
 	Pin   uint
 	Value bool
+}
+
+type LED struct {
+	Name string
+	Pin  uint
+}
+
+type RGBLED struct {
+	Name     string
+	RedPin   uint
+	GreenPin uint
+	BluePin  uint
 }
 
 func New(device string, logger *logrus.Logger) *Panel {
@@ -30,6 +46,7 @@ func New(device string, logger *logrus.Logger) *Panel {
 		logger: logger,
 		layout: Layout{
 			Buttons: make(map[uint]Button),
+			LEDs:    make(map[string]LED),
 		},
 		events: make(chan string, 1),
 	}
@@ -55,6 +72,42 @@ func (p *Panel) AddButton(name string, pin int) {
 	}
 	p.cf.SetPinMode(byte(pin), firmata.Input)
 	p.cf.EnableDigitalInput(uint(pin), true)
+}
+
+func (p *Panel) AddLED(name string, pin int) {
+	p.layout.LEDs[name] = LED{
+		Name: name,
+		Pin:  uint(pin),
+	}
+	p.cf.SetPinMode(byte(pin), firmata.PWM)
+}
+
+func (p *Panel) SetLEDIntensity(name string, intensity byte) error {
+	if v, ok := p.layout.LEDs[name]; ok {
+		p.cf.AnalogWrite(v.Pin, intensity)
+	}
+	return fmt.Errorf("No LED defined with this name")
+}
+
+func (p *Panel) AddRGBLED(name string, rpin int, gpin int, bpin int) {
+	p.layout.RGB[name] = RGBLED{
+		Name:     name,
+		RedPin:   uint(rpin),
+		GreenPin: uint(gpin),
+		BluePin:  uint(bpin),
+	}
+	p.cf.SetPinMode(byte(rpin), firmata.PWM)
+	p.cf.SetPinMode(byte(gpin), firmata.PWM)
+	p.cf.SetPinMode(byte(bpin), firmata.PWM)
+}
+
+func (p *Panel) SetRGBIntensity(name string, r byte, g byte, b byte) error {
+	if v, ok := p.layout.RGB[name]; ok {
+		p.cf.AnalogWrite(v.RedPin, r)
+		p.cf.AnalogWrite(v.GreenPin, g)
+		p.cf.AnalogWrite(v.BluePin, b)
+	}
+	return fmt.Errorf("No RGB LED defined with this name")
 }
 
 func (p *Panel) scan(v <-chan firmata.FirmataValue) {

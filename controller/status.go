@@ -43,8 +43,6 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 			}
 		}
 	}
-	return "status"
-
 }
 
 func (m *Status) Name() string {

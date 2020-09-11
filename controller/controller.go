@@ -48,21 +48,8 @@ func (c *Controller) Start() {
 	}()
 
 	for {
-		Options[c.state].Run(c, evProp, quit)
+		c.state = Options[c.state].Run(c, evProp, quit)
 	}
-
-	//c.display.RenderList([]string{"passport.mid", "pepega.mid", "super-fighta.mid", "denis.mid"}, 2)
-	// c.display.RenderStatus(
-	// 	lcd.StatusScreen{
-	// 		Title:    "passport.mid",
-	// 		Tempo:    c.player.GetBPM(),
-	// 		Volume:   "100%",
-	// 		Progress: 50,
-	// 	},
-	// )
-
-	// c.player.Play("files/passport.mid")
-	// c.player.Wait()
 
 }
 
