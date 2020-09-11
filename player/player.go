@@ -1,7 +1,6 @@
 package player
 
 import (
-	"fmt"
 	"io/ioutil"
 	"strconv"
 
@@ -19,6 +18,8 @@ type Player struct {
 	synth    fluidsynth2.Synth
 	driver   fluidsynth2.AudioDriver
 	fsPlayer fluidsynth2.Player
+
+	filename string
 }
 
 func New(c Configuration) (*Player, error) {
@@ -51,9 +52,11 @@ func (p *Player) Play(filename string) error {
 		return err
 	}
 
+	p.filename = filename
+
 	errCode := p.fsPlayer.AddMem(dat)
 	if errCode != nil {
-		return fmt.Errorf("Could not load MIDI data into FluidSynth")
+		return errCode
 	}
 
 	return nil
@@ -62,6 +65,25 @@ func (p *Player) Play(filename string) error {
 
 func (p *Player) GetBPM() string {
 	return strconv.Itoa(p.fsPlayer.GetBPM()) + " BPM"
+}
+
+func (p *Player) GetPlayingSong() string {
+	pm := p.fsPlayer.GetStatus()
+	if pm == "PLAYING" || pm == "DONE" {
+		return p.filename
+	}
+
+	return ""
+
+}
+
+func (p *Player) GetProgress() int {
+	curr := p.fsPlayer.GetCurrentTick()
+	total := p.fsPlayer.GetTotalTicks()
+	if total > 0 {
+		return curr / total * 100
+	}
+	return 0
 }
 
 func (p *Player) Wait() {

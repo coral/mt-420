@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 
 	"github.com/sirupsen/logrus"
 )
@@ -43,7 +44,7 @@ func (l *LCD) RenderStatus(s StatusScreen) {
 	l.Clear()
 	l.buffer[0] = "NOW PLAYING:"
 	l.buffer[1] = s.Title
-	l.buffer[2] = "I------------->"
+	l.buffer[2] = strconv.Itoa(s.Progress)
 	l.buffer[3] = "TEMPO: " + s.Tempo + " VOL:" + s.Volume
 	l.render()
 }
