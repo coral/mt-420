@@ -2,11 +2,12 @@ package panel
 
 import (
 	"github.com/baol/go-firmata"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 type Panel struct {
 	cf     *firmata.FirmataClient
+	logger *logrus.Logger
 	device string
 	layout Layout
 	events chan string
@@ -22,9 +23,11 @@ type Button struct {
 	Value bool
 }
 
-func New(device string) *Panel {
+func New(device string, logger *logrus.Logger) *Panel {
+
 	return &Panel{
 		device: device,
+		logger: logger,
 		layout: Layout{
 			Buttons: make(map[uint]Button),
 		},
@@ -62,7 +65,7 @@ func (p *Panel) scan(v <-chan firmata.FirmataValue) {
 		} else {
 			_, u, err := update.GetDigitalValue()
 			if err != nil {
-				log.WithFields(log.Fields{
+				p.logger.WithFields(logrus.Fields{
 					"Error": err,
 				}).Error("GetDigitalValue error")
 			}

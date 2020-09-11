@@ -3,6 +3,7 @@ package player
 import (
 	"fmt"
 	"io/ioutil"
+	"strconv"
 
 	"github.com/coral/fluidsynth2"
 )
@@ -57,6 +58,10 @@ func (p *Player) Play(filename string) error {
 
 	return nil
 
+}
+
+func (p *Player) GetBPM() string {
+	return strconv.Itoa(p.fsPlayer.GetBPM()) + " BPM"
 }
 
 func (p *Player) Wait() {

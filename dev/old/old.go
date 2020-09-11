@@ -40,7 +40,6 @@ func main() {
 	c, err := firmata.NewClient("/dev/cu.usbmodem14444301", 57600)
 	if err != nil {
 		panic("Cannot open client")
-		panic(err)
 	}
 	c.SetPinMode(2, firmata.Input)
 	c.SetPinMode(3, firmata.Input)
