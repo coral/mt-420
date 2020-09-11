@@ -3,13 +3,13 @@ package panel
 import (
 	"github.com/baol/go-firmata"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/exp/errors/fmt"
 )
 
 type Panel struct {
 	cf     *firmata.FirmataClient
 	device string
 	layout Layout
+	events chan string
 }
 
 type Layout struct {
@@ -28,6 +28,7 @@ func New(device string) *Panel {
 		layout: Layout{
 			Buttons: make(map[uint]Button),
 		},
+		events: make(chan string, 1),
 	}
 }
 
@@ -71,11 +72,15 @@ func (p *Panel) scan(v <-chan firmata.FirmataValue) {
 					if b.Value != val {
 						b.Value = val.(bool)
 						if val.(bool) {
-							fmt.Println(b)
+							p.events <- b.Name
 						}
 					}
 				}
 			}
 		}
 	}
+}
+
+func (p *Panel) GetEvents() <-chan string {
+	return p.events
 }

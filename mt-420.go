@@ -4,6 +4,7 @@ import (
 	"github.com/coral/mt-420/panel"
 	"github.com/coral/mt-420/player"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/exp/errors/fmt"
 )
 
 func main() {
@@ -17,6 +18,14 @@ func main() {
 
 	panel.AddButton("play", 2)
 	panel.AddButton("stop", 3)
+
+	events := panel.GetEvents()
+	go func() {
+		for {
+			e := <-events
+			fmt.Println(e)
+		}
+	}()
 
 	p, err := player.New(player.Configuration{
 		SoundFont:    "files/SC-55.sf2",
