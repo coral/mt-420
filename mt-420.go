@@ -7,11 +7,14 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/coral/mt-420/storage"
+
 	"github.com/coral/mt-420/controller"
 	"github.com/coral/mt-420/lcd"
 	"github.com/coral/mt-420/panel"
 	"github.com/coral/mt-420/player"
 	"github.com/coral/mt-420/storage/floppy"
+	"github.com/coral/mt-420/storage/mock"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/errors/fmt"
 )
@@ -28,6 +31,7 @@ func (e ErrorShim) Write(data []byte) (n int, err error) {
 
 func main() {
 	virtual := flag.Bool("virtual", false, "virtual")
+	mockFS := flag.Bool("mock", false, "mockfs")
 	flag.Parse()
 	delay := 0
 
@@ -80,8 +84,12 @@ func main() {
 	delayWriter("Warming up floppy", delay, display)
 
 	//Floppy
-	storage := floppy.New("/dev/sdb", "/media/floppy")
-	//storage := mock.New("files/midi")
+	var storage storage.Storage
+	if *mockFS {
+		storage = mock.New("files/midi")
+	} else {
+		storage = floppy.New("/dev/sdb", "/media/floppy")
+	}
 	storage.Init()
 
 	//Controller
