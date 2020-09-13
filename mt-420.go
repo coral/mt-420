@@ -72,7 +72,7 @@ func main() {
 	case "darwin":
 		backend = "coreaudio"
 	case "linux":
-		backend = "pulseaudio"
+		backend = "alsa"
 	}
 
 	//Player
