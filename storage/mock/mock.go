@@ -5,8 +5,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-
-	"github.com/coral/mt-420/storage"
 )
 
 type Mock struct {
@@ -48,9 +46,4 @@ func (m *Mock) LoadFile(f os.FileInfo) ([]byte, error) {
 		return nil, err
 	}
 	return dat, nil
-}
-
-func (m *Mock) Watch() <-chan storage.Events {
-
-	return make(<-chan storage.Events)
 }

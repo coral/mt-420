@@ -78,15 +78,11 @@ func main() {
 	}
 
 	delayWriter("Warming up floppy", delay, display)
+
 	//Floppy
 	//fl := floppy.New("/dev/fd0", "/media/floppy")
 	storage := mock.New("files/midi")
-	// f := storage.ListFiles()
-	// d, err := storage.LoadFile(f[0].Name())
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// p.Play(f[0].Name(), d)
+	storage.Init()
 
 	//Controller
 	controller := controller.New(p, panel, storage, display)

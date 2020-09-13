@@ -1,7 +1,9 @@
 package floppy
 
 import (
+	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 type Floppy struct {
@@ -19,14 +21,24 @@ func New(device string, mountpoint string) *Floppy {
 }
 
 func (f *Floppy) Init() {
-
+	go f.watchFloppy()
 }
 
 func (f *Floppy) ListFiles() []os.FileInfo {
 	return f.FileIndex
 }
 
-func ()
+func (m *Floppy) LoadFile(f os.FileInfo) ([]byte, error) {
+	dat, err := ioutil.ReadFile(filepath.Join(m.mountpoint, f.Name()))
+	if err != nil {
+		return nil, err
+	}
+	return dat, nil
+}
+
+func (m *Floppy) checkMountStatus() bool {
+
+}
 
 // func (d *Disk) Watch() {
 // 	cmd := exec.Command("diskd", "-d", d.device).Run()

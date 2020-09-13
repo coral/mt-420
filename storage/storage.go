@@ -9,5 +9,4 @@ type Storage interface {
 	Init()
 	ListFiles() []os.FileInfo
 	LoadFile(f os.FileInfo) ([]byte, error)
-	Watch() <-chan Events
 }
