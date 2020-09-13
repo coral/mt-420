@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"io"
 	"os"
 	"time"
@@ -25,6 +26,8 @@ func (e ErrorShim) Write(data []byte) (n int, err error) {
 }
 
 func main() {
+	virtual := flag.Bool("virtual", false, "virtual")
+	flag.Parse()
 	delay := 0
 
 	log := logrus.New()
@@ -42,7 +45,7 @@ func main() {
 
 	delayWriter("Connecting to panel", delay, display)
 	// Panel
-	panel := panel.New("/dev/cu.usbmodem14444301", log)
+	panel := panel.New("/dev/cu.usbmodem14444301", *virtual, log)
 	err := panel.Init()
 	if err != nil {
 		panic(err)

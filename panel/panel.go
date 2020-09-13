@@ -2,17 +2,20 @@ package panel
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/baol/go-firmata"
+	"github.com/eiannone/keyboard"
 	"github.com/sirupsen/logrus"
 )
 
 type Panel struct {
-	cf     *firmata.FirmataClient
-	logger *logrus.Logger
-	device string
-	layout Layout
-	events chan string
+	cf      *firmata.FirmataClient
+	logger  *logrus.Logger
+	device  string
+	layout  Layout
+	events  chan string
+	virtual bool
 }
 
 type Layout struct {
@@ -39,7 +42,7 @@ type RGBLED struct {
 	BluePin  uint
 }
 
-func New(device string, logger *logrus.Logger) *Panel {
+func New(device string, virtual bool, logger *logrus.Logger) *Panel {
 
 	return &Panel{
 		device: device,
@@ -48,20 +51,28 @@ func New(device string, logger *logrus.Logger) *Panel {
 			Buttons: make(map[uint]Button),
 			LEDs:    make(map[string]LED),
 		},
-		events: make(chan string, 1),
+		events:  make(chan string, 1),
+		virtual: virtual,
 	}
 }
 
 func (p *Panel) Init() error {
-	c, err := firmata.NewClient(p.device, 57600)
-	if err != nil {
-		return err
+	if !p.virtual {
+		c, err := firmata.NewClient(p.device, 57600)
+		if err != nil {
+			return err
+		}
+
+		p.cf = c
+
+		go p.scan(c.GetValues())
+	} else {
+		if err := keyboard.Open(); err != nil {
+			panic(err)
+		}
+
+		go p.key()
 	}
-
-	p.cf = c
-
-	go p.scan(c.GetValues())
-
 	return nil
 }
 
@@ -70,8 +81,10 @@ func (p *Panel) AddButton(name string, pin int) {
 		Name: name,
 		Pin:  uint(pin),
 	}
-	p.cf.SetPinMode(byte(pin), firmata.Input)
-	p.cf.EnableDigitalInput(uint(pin), true)
+	if !p.virtual {
+		p.cf.SetPinMode(byte(pin), firmata.Input)
+		p.cf.EnableDigitalInput(uint(pin), true)
+	}
 }
 
 func (p *Panel) AddLED(name string, pin int) {
@@ -133,6 +146,30 @@ func (p *Panel) scan(v <-chan firmata.FirmataValue) {
 					}
 				}
 			}
+		}
+	}
+}
+
+func (p *Panel) key() {
+	for {
+		char, key, err := keyboard.GetKey()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("You pressed: rune %q, key %X\r\n", char, key)
+
+		switch r := string(char); r {
+		case "d":
+			p.events <- "el"
+		case "a":
+			p.events <- "er"
+		case "p":
+			p.events <- "play"
+		case "q":
+			p.events <- "escape"
+		}
+		if key == keyboard.KeyEsc {
+			os.Exit(1)
 		}
 	}
 }
