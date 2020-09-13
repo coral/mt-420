@@ -11,7 +11,7 @@ import (
 	"github.com/coral/mt-420/lcd"
 	"github.com/coral/mt-420/panel"
 	"github.com/coral/mt-420/player"
-	"github.com/coral/mt-420/storage/mock"
+	"github.com/coral/mt-420/storage/floppy"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/errors/fmt"
 )
@@ -80,8 +80,8 @@ func main() {
 	delayWriter("Warming up floppy", delay, display)
 
 	//Floppy
-	//fl := floppy.New("/dev/fd0", "/media/floppy")
-	storage := mock.New("files/midi")
+	storage := floppy.New("/dev/sdb", "/media/floppy")
+	//storage := mock.New("files/midi")
 	storage.Init()
 
 	//Controller

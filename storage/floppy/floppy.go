@@ -1,9 +1,14 @@
 package floppy
 
 import (
+	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
+	"time"
 )
 
 type Floppy struct {
@@ -21,11 +26,32 @@ func New(device string, mountpoint string) *Floppy {
 }
 
 func (f *Floppy) Init() {
-	go f.watchFloppy()
+	if f.checkMountStatus() {
+		f.mounted = true
+	} else {
+		f.mountFloppy()
+		time.Sleep(1 * time.Second)
+		f.Init()
+	}
 }
 
 func (f *Floppy) ListFiles() []os.FileInfo {
-	return f.FileIndex
+	files, err := ioutil.ReadDir(f.mountpoint)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var t []os.FileInfo
+
+	for _, file := range files {
+		if !file.IsDir() {
+			if filepath.Ext(file.Name()) == ".mid" || filepath.Ext(file.Name()) == ".midi" {
+				t = append(t, file)
+			}
+		}
+	}
+
+	return t
 }
 
 func (m *Floppy) LoadFile(f os.FileInfo) ([]byte, error) {
@@ -38,30 +64,26 @@ func (m *Floppy) LoadFile(f os.FileInfo) ([]byte, error) {
 
 func (m *Floppy) checkMountStatus() bool {
 
+	content, err := ioutil.ReadFile("/proc/mounts")
+	if err != nil {
+		fmt.Println(err)
+	}
+	lines := strings.Split(string(content), "\n")
+
+	for _, mt := range lines {
+		if strings.Contains(mt, "/media/floppy") {
+			return true
+		}
+	}
+
+	return false
+
 }
 
-// func (d *Disk) Watch() {
-// 	cmd := exec.Command("diskd", "-d", d.device).Run()
-// 	fmt.Println(cmd)
-// 	d.mount()
-// }
+func (m *Floppy) mountFloppy() error {
 
-// func (d *Disk) mount() {
-// 	cmd := exec.Command("mount", d.mountpoint).Run()
-// 	fmt.Println(cmd)
+	cmd := exec.Command("mount", m.device).Run()
+	fmt.Println(cmd)
 
-// 	d.indexDisk()
-// }
-
-// func (d *Disk) indexDisk() {
-// 	files, err := ioutil.ReadDir(d.mountpoint)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	d.FileIndex = files
-
-// 	for _, file := range d.FileIndex {
-// 		fmt.Println(file.Name())
-// 	}
-// }
+	return nil
+}
