@@ -156,7 +156,6 @@ func (p *Panel) key() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("You pressed: rune %q, key %X\r\n", char, key)
 
 		switch r := string(char); r {
 		case "d":

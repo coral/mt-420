@@ -5,7 +5,6 @@ import (
 	"math"
 	"os"
 	"os/exec"
-	"strconv"
 
 	"github.com/sirupsen/logrus"
 )
@@ -21,7 +20,7 @@ type StatusScreen struct {
 	Volume   string
 	Tempo    string
 	Title    string
-	Progress int
+	Progress float64
 	State    string
 }
 
@@ -45,7 +44,7 @@ func (l *LCD) RenderStatus(s StatusScreen) {
 	l.Clear()
 	l.buffer[0] = "NOW PLAYING:"
 	l.buffer[1] = s.Title
-	l.buffer[2] = strconv.Itoa(s.Progress)
+	l.buffer[2] = l.progressBar(s.Progress)
 	l.buffer[3] = "TEMPO: " + s.Tempo + " VOL:" + s.Volume
 	l.render()
 }
@@ -54,21 +53,22 @@ func (l *LCD) RenderList(items []string, selector int) {
 
 	l.Clear()
 
-	fmt.Println(selector)
-
 	page := int(math.Floor(float64(selector) / 4))
 	pages := int(math.Floor(float64(len(items)) / 4))
 	if len(items)%4 != 0 {
 		pages++
 	}
 
-	list := items[page : page+4]
+	list := items[page*4:]
+	if len(list) > 4 {
+		list = list[:4]
+	}
 
 	for i, item := range list {
 		if i != selector%4 {
-			l.buffer[i] = item
+			l.buffer[i] = l.trim(item)
 		} else {
-			l.buffer[i] = "-> " + item
+			l.buffer[i] = l.trim("-> " + item)
 		}
 	}
 
@@ -119,4 +119,21 @@ func (l *LCD) render() {
 			fmt.Println(val)
 		}
 	}
+}
+
+func (l *LCD) trim(si string) string {
+	if len(si) > 20 {
+		return si[0:19]
+	}
+	return si
+}
+
+func (l *LCD) progressBar(x float64) string {
+	var ic float64 = 0.18
+	pg := int(math.Ceil(ic * x))
+	template := "I                  I"
+	for i := 0; i < pg; i++ {
+		template = template[:i+1] + "-" + template[i+1:]
+	}
+	return template
 }

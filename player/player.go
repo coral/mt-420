@@ -71,11 +71,11 @@ func (p *Player) GetPlayingSong() string {
 
 }
 
-func (p *Player) GetProgress() int {
+func (p *Player) GetProgress() float64 {
 	curr := p.fsPlayer.GetCurrentTick()
 	total := p.fsPlayer.GetTotalTicks()
 	if total > 0 {
-		return curr / total * 100
+		return float64(curr) / float64(total) * 100
 	}
 	return 0
 }
