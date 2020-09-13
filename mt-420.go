@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/coral/mt-420/controller"
-	"github.com/coral/mt-420/floppy"
 	"github.com/coral/mt-420/lcd"
 	"github.com/coral/mt-420/panel"
 	"github.com/coral/mt-420/player"
+	"github.com/coral/mt-420/storage/mock"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/errors/fmt"
 )
@@ -55,14 +55,6 @@ func main() {
 	panel.AddButton("play", 2)
 	panel.AddButton("escape", 3)
 
-	// events := panel.GetEvents()
-	// go func() {
-	// 	for {
-	// 		e := <-events
-	// 		fmt.Println(e)
-	// 	}
-	// }()
-
 	delayWriter("Loading Fluidsynth", delay, display)
 
 	var backend string
@@ -87,10 +79,17 @@ func main() {
 
 	delayWriter("Warming up floppy", delay, display)
 	//Floppy
-	fl := floppy.New("/dev/fd0", "/media/floppy")
+	//fl := floppy.New("/dev/fd0", "/media/floppy")
+	storage := mock.New("files/midi")
+	// f := storage.ListFiles()
+	// d, err := storage.LoadFile(f[0].Name())
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// p.Play(f[0].Name(), d)
 
 	//Controller
-	controller := controller.New(p, panel, fl, display)
+	controller := controller.New(p, panel, storage, display)
 	controller.Start()
 
 }

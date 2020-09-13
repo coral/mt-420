@@ -1,7 +1,6 @@
 package player
 
 import (
-	"io/ioutil"
 	"strconv"
 
 	"github.com/coral/fluidsynth2"
@@ -41,20 +40,15 @@ func New(c Configuration) (*Player, error) {
 	}, nil
 }
 
-func (p *Player) Play(filename string) error {
+func (p *Player) Play(filename string, data []byte) error {
 
 	p.fsPlayer.Stop()
 	p.fsPlayer.Close()
 	p.fsPlayer = fluidsynth2.NewPlayer(p.synth)
 
-	dat, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return err
-	}
-
 	p.filename = filename
 
-	errCode := p.fsPlayer.AddMem(dat)
+	errCode := p.fsPlayer.AddMem(data)
 	if errCode != nil {
 		return errCode
 	}

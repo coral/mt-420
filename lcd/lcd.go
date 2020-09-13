@@ -2,6 +2,7 @@ package lcd
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/exec"
 	"strconv"
@@ -50,8 +51,21 @@ func (l *LCD) RenderStatus(s StatusScreen) {
 }
 
 func (l *LCD) RenderList(items []string, selector int) {
-	for i, item := range items {
-		if i != selector {
+
+	l.Clear()
+
+	fmt.Println(selector)
+
+	page := int(math.Floor(float64(selector) / 4))
+	pages := int(math.Floor(float64(len(items)) / 4))
+	if len(items)%4 != 0 {
+		pages++
+	}
+
+	list := items[page : page+4]
+
+	for i, item := range list {
+		if i != selector%4 {
 			l.buffer[i] = item
 		} else {
 			l.buffer[i] = "-> " + item

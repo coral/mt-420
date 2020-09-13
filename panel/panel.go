@@ -160,12 +160,20 @@ func (p *Panel) key() {
 
 		switch r := string(char); r {
 		case "d":
-			p.events <- "el"
+			p.events <- "encoderRight"
 		case "a":
-			p.events <- "er"
+			p.events <- "encoderLeft"
+		case "w":
+			p.events <- "encoderClick"
 		case "p":
 			p.events <- "play"
-		case "q":
+		case "o":
+			p.events <- "pause"
+		case "i":
+			p.events <- "stop"
+		case "u":
+			p.events <- "menu"
+		case "y":
 			p.events <- "escape"
 		}
 		if key == keyboard.KeyEsc {

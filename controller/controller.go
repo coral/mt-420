@@ -1,30 +1,31 @@
 package controller
 
 import (
-	"github.com/coral/mt-420/floppy"
 	"github.com/coral/mt-420/lcd"
 	"github.com/coral/mt-420/panel"
 	"github.com/coral/mt-420/player"
+	"github.com/coral/mt-420/storage"
 )
 
 var Options = map[string]Option{
-	"status": &Status{},
+	"status":  &Status{},
+	"browser": &Browser{},
 }
 
 type Controller struct {
 	player  *player.Player
 	panel   *panel.Panel
-	floppy  *floppy.Disk
+	storage storage.Storage
 	display *lcd.LCD
 
 	state string
 }
 
-func New(player *player.Player, panel *panel.Panel, floppy *floppy.Disk, l *lcd.LCD) *Controller {
+func New(player *player.Player, panel *panel.Panel, storage storage.Storage, l *lcd.LCD) *Controller {
 	return &Controller{
 		player:  player,
 		panel:   panel,
-		floppy:  floppy,
+		storage: storage,
 		display: l,
 		state:   "status",
 	}

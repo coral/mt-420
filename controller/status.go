@@ -39,7 +39,10 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 		case m := <-events:
 			switch m {
 			case "play":
-				c.player.Play("files/passport.mid")
+				//c.player.Play("files/passport.mid")
+			case "encoderClick":
+				renderEnd <- true
+				return "browser"
 			}
 		}
 	}
