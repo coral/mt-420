@@ -65,8 +65,7 @@ func main() {
 	delayWriter("Loading Fluidsynth", delay, display)
 	//Player
 	p, err := player.New(player.Configuration{
-		SoundFont:    "files/SC-55.sf2",
-		AudioBackend: "coreaudio",
+		SoundFont: "files/SC-55.sf2",
 	})
 	defer p.Close()
 	if err != nil {
