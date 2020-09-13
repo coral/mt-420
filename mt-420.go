@@ -4,6 +4,7 @@ import (
 	"flag"
 	"io"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/coral/mt-420/controller"
@@ -63,9 +64,21 @@ func main() {
 	// }()
 
 	delayWriter("Loading Fluidsynth", delay, display)
+
+	var backend string
+
+	os := runtime.GOOS
+	switch os {
+	case "darwin":
+		backend = "coreaudio"
+	case "linux":
+		backend = "pulseaudio"
+	}
+
 	//Player
 	p, err := player.New(player.Configuration{
-		SoundFont: "files/SC-55.sf2",
+		SoundFont:    "files/SC-55.sf2",
+		AudioBackend: backend,
 	})
 	defer p.Close()
 	if err != nil {
