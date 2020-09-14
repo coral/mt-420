@@ -28,7 +28,11 @@ func (m *Browser) Run(c *Controller, events <-chan string, end chan bool) string
 			case <-renderEnd:
 				return
 			default:
-				c.display.RenderList(fn, selector.value)
+				if len(fn) > 0 {
+					c.display.RenderList(fn, selector.value)
+				} else {
+					c.display.Message("No files on floppy")
+				}
 				time.Sleep(50 * time.Millisecond)
 			}
 		}
@@ -46,11 +50,13 @@ func (m *Browser) Run(c *Controller, events <-chan string, end chan bool) string
 			case "encoderLeft":
 				selector.Decrement()
 			case "encoderClick":
-				d, err := c.storage.LoadFile(files[selector.Value()])
-				if err != nil {
-					c.display.Error(err)
+				if len(files) > 0 {
+					d, err := c.storage.LoadFile(files[selector.Value()])
+					if err != nil {
+						c.display.Error(err)
+					}
+					c.player.Play(files[selector.Value()].Name(), d)
 				}
-				c.player.Play(files[selector.Value()].Name(), d)
 				renderEnd <- true
 				return "status"
 			}
