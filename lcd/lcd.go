@@ -197,9 +197,9 @@ func (l *LCD) trim(si string) string {
 func (l *LCD) progressBar(x float64) string {
 	var ic float64 = 0.18
 	pg := int(math.Ceil(ic * x))
-	template := "I                  I"
+	template := "I                 I"
 	for i := 0; i < pg; i++ {
-		template = template[:i+1] + "-" + template[i+1:]
+		template = template[:i] + "-" + template[1:]
 	}
 	return template
 }

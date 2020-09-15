@@ -16,16 +16,20 @@ func NewSelector(initialValue int, steps int, min int, max int) Selector {
 	}
 }
 
-func (s *Selector) Increment() {
+func (s *Selector) Increment() bool {
 	if s.value+s.steps <= s.max {
 		s.value = s.value + s.steps
+		return true
 	}
+	return false
 }
 
-func (s *Selector) Decrement() {
+func (s *Selector) Decrement() bool {
 	if s.value-s.steps >= s.min {
 		s.value = s.value - s.steps
+		return true
 	}
+	return false
 }
 
 func (s *Selector) Value() int {

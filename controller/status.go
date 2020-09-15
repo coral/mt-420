@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"math"
 	"path/filepath"
 	"strings"
 	"time"
@@ -14,24 +15,42 @@ type Status struct {
 func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string {
 	c.display.SetColor(0, 255, 0)
 	var renderEnd = make(chan bool)
+	go c.display.RenderStatus(
+		lcd.StatusScreen{
+			Title: strings.TrimSuffix(
+				c.player.GetPlayingSong(),
+				filepath.Ext(c.player.GetPlayingSong())),
+			Tempo:    c.player.GetBPM(),
+			Volume:   "100%",
+			Progress: c.player.GetProgress(),
+			State:    c.player.GetState(),
+		},
+	)
 	go func() {
+		var progress = 0
 		for {
 			select {
 			case <-renderEnd:
 				return
 			default:
-				c.display.RenderStatus(
-					lcd.StatusScreen{
-						Title: strings.TrimSuffix(
-							c.player.GetPlayingSong(),
-							filepath.Ext(c.player.GetPlayingSong())),
-						Tempo:    c.player.GetBPM(),
-						Volume:   "100%",
-						Progress: c.player.GetProgress(),
-						State:    c.player.GetState(),
-					},
-				)
-				time.Sleep(1000 * time.Millisecond)
+				var ic float64 = 0.18
+				pg := int(math.Ceil(ic * c.player.GetProgress()))
+				if progress != pg {
+					progress = pg
+					go c.display.RenderStatus(
+						lcd.StatusScreen{
+							Title: strings.TrimSuffix(
+								c.player.GetPlayingSong(),
+								filepath.Ext(c.player.GetPlayingSong())),
+							Tempo:    c.player.GetBPM(),
+							Volume:   "100%",
+							Progress: c.player.GetProgress(),
+							State:    c.player.GetState(),
+						},
+					)
+				} else {
+					time.Sleep(100 * time.Millisecond)
+				}
 			}
 		}
 	}()
@@ -52,7 +71,6 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 		}
 	}
 }
-
 func (m *Status) Name() string {
 	return "status"
 }

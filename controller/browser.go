@@ -47,11 +47,13 @@ func (m *Browser) Run(c *Controller, events <-chan string, end chan bool) string
 		case m := <-events:
 			switch m {
 			case "encoderRight":
-				selector.Increment()
-				update <- true
+				if selector.Increment() {
+					update <- true
+				}
 			case "encoderLeft":
-				selector.Decrement()
-				update <- true
+				if selector.Decrement() {
+					update <- true
+				}
 			case "encoderClick":
 				if len(files) > 0 {
 					d, err := c.storage.LoadFile(files[selector.Value()])
