@@ -71,6 +71,10 @@ func (p *Player) GetPlayingSong() string {
 
 }
 
+func (p *Player) GetState() string {
+	return p.fsPlayer.GetStatus()
+}
+
 func (p *Player) GetProgress() float64 {
 	curr := p.fsPlayer.GetCurrentTick()
 	total := p.fsPlayer.GetTotalTicks()

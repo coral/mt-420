@@ -31,7 +31,9 @@ func (e ErrorShim) Write(data []byte) (n int, err error) {
 
 func main() {
 	virtual := flag.Bool("virtual", false, "virtual")
-	mockFS := flag.Bool("mock", false, "mockfs")
+	terminalDisplay := flag.Bool("tdisp", false, "terminal display")
+	mockFS := flag.Bool("mock", false, "mock")
+
 	flag.Parse()
 	delay := 0
 
@@ -39,7 +41,11 @@ func main() {
 	log.SetLevel(logrus.WarnLevel)
 
 	//LCD
-	display := lcd.New(true, log)
+	display := lcd.New("/dev/cu.usbmodem142444301", *terminalDisplay, log)
+	err := display.Init()
+	if err != nil {
+		panic("display fail")
+	}
 	delayWriter("Starting MT-420", delay, display)
 
 	ersh := ErrorShim{
@@ -51,7 +57,7 @@ func main() {
 	delayWriter("Connecting to panel", delay, display)
 	// Panel
 	panel := panel.New("/dev/cu.usbmodem14444301", *virtual, log)
-	err := panel.Init()
+	err = panel.Init()
 	if err != nil {
 		panic(err)
 	}
@@ -82,7 +88,6 @@ func main() {
 	}
 
 	delayWriter("Warming up floppy", delay, display)
-
 	//Floppy
 	var storage storage.Storage
 	if *mockFS {

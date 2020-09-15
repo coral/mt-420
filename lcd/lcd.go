@@ -5,15 +5,19 @@ import (
 	"math"
 	"os"
 	"os/exec"
+	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/tarm/serial"
 )
 
 type LCD struct {
-	logger  *logrus.Logger
-	device  string
-	virtual bool
-	buffer  [4]string
+	logger       *logrus.Logger
+	device       string
+	virtual      bool
+	buffer       [4]string
+	serialConfig *serial.Config
+	conn         *serial.Port
 }
 
 type StatusScreen struct {
@@ -24,28 +28,69 @@ type StatusScreen struct {
 	State    string
 }
 
-func New(virtual bool, log *logrus.Logger) *LCD {
-	if virtual {
-		cmd := exec.Command("clear")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-	}
-
+func New(device string, virtual bool, log *logrus.Logger) *LCD {
 	return &LCD{
 		logger:  log,
+		device:  device,
 		virtual: virtual,
 		buffer:  [4]string{"", "", "", ""},
 	}
+}
+
+func (l *LCD) Init() error {
+	if l.virtual {
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	} else {
+		l.serialConfig = &serial.Config{Name: "/dev/cu.usbmodem142444301", Baud: 9600}
+		s, err := serial.OpenPort(l.serialConfig)
+		if err != nil {
+			return err
+		}
+
+		l.conn = s
+
+		//Clear screen
+		s.Write([]byte{0xFE, 0x58})
+		time.Sleep(10 * time.Millisecond)
+
+		//Block cursor off
+		s.Write([]byte{0xFE, 0x54})
+		time.Sleep(10 * time.Millisecond)
+
+		//Autoscroll off
+		s.Write([]byte{0xFE, 0x52})
+		time.Sleep(10 * time.Millisecond)
+
+		//Set Brightness
+		s.Write([]byte{0xFE, 0x99, 0xFF})
+		time.Sleep(10 * time.Millisecond)
+
+		//Set contrast
+		s.Write([]byte{0xFE, 0x50, 200})
+		time.Sleep(10 * time.Millisecond)
+
+		////Set backlight
+		s.Write([]byte{0xFE, 0xD0, 0xFF, 0xFF, 0x00})
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	return nil
 }
 
 //MENUS
 
 func (l *LCD) RenderStatus(s StatusScreen) {
 	l.Clear()
-	l.buffer[0] = "NOW PLAYING:"
-	l.buffer[1] = s.Title
-	l.buffer[2] = l.progressBar(s.Progress)
-	l.buffer[3] = "TEMPO: " + s.Tempo + " VOL:" + s.Volume
+	if s.State == "PLAYING" {
+		l.buffer[0] = "PLAYING:"
+		l.buffer[1] = s.Title
+		l.buffer[2] = l.progressBar(s.Progress)
+		l.buffer[3] = "TEMPO: " + s.Tempo
+	} else {
+		l.buffer[0] = "ATP MT-420"
+	}
 	l.render()
 }
 
@@ -107,6 +152,14 @@ func (l *LCD) Clear() {
 	l.render()
 }
 
+func (l *LCD) SetColor(r byte, g byte, b byte) {
+	////Set backlight
+	l.conn.Write([]byte{0xFE, 0xD0, r, g, b})
+	time.Sleep(10 * time.Millisecond)
+}
+
+//////INTERNAL
+
 func (l *LCD) writeLine(line string, index int) {
 	l.buffer[index] = line
 }
@@ -118,7 +171,20 @@ func (l *LCD) render() {
 		for _, val := range l.buffer {
 			fmt.Println(val)
 		}
+	} else {
+		//Clear LCD
+		l.conn.Write([]byte{0xFE, 0x48})
+		time.Sleep(10 * time.Millisecond)
+		for _, val := range l.buffer {
+			data := l.trim(val)
+			if len(data) > 19 {
+				l.conn.Write([]byte(l.trim(val)))
+			} else {
+				l.conn.Write(append([]byte(data), []byte{0x0D, 0x0A}...))
+			}
+		}
 	}
+
 }
 
 func (l *LCD) trim(si string) string {

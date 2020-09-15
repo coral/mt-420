@@ -82,8 +82,5 @@ func (m *Floppy) checkMountStatus() bool {
 
 func (m *Floppy) mountFloppy() error {
 
-	cmd := exec.Command("mount", m.device).Run()
-	fmt.Println(cmd)
-
-	return nil
+	return exec.Command("mount", m.device).Run()
 }
