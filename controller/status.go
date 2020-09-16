@@ -10,24 +10,17 @@ import (
 )
 
 type Status struct {
+	c *Controller
 }
 
 func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string {
-	c.display.SetColor(0, 255, 0)
+	//c.display.SetColor(0, 255, 0)
+	m.c = c
 	var renderEnd = make(chan bool)
-	go c.display.RenderStatus(
-		lcd.StatusScreen{
-			Title: strings.TrimSuffix(
-				c.player.GetPlayingSong(),
-				filepath.Ext(c.player.GetPlayingSong())),
-			Tempo:    c.player.GetBPM(),
-			Volume:   "100%",
-			Progress: c.player.GetProgress(),
-			State:    c.player.GetState(),
-		},
-	)
+	m.render()
 	go func() {
 		var progress = 0
+		var state string = "DONE"
 		for {
 			select {
 			case <-renderEnd:
@@ -35,22 +28,19 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 			default:
 				var ic float64 = 0.18
 				pg := int(math.Ceil(ic * c.player.GetProgress()))
-				if progress != pg {
+				st := c.player.GetState()
+
+				if progress != pg && state != "PAUSED" {
 					progress = pg
-					go c.display.RenderStatus(
-						lcd.StatusScreen{
-							Title: strings.TrimSuffix(
-								c.player.GetPlayingSong(),
-								filepath.Ext(c.player.GetPlayingSong())),
-							Tempo:    c.player.GetBPM(),
-							Volume:   "100%",
-							Progress: c.player.GetProgress(),
-							State:    c.player.GetState(),
-						},
-					)
-				} else {
-					time.Sleep(100 * time.Millisecond)
+					m.render()
 				}
+
+				if state != st {
+					state = st
+					m.render()
+				}
+
+				time.Sleep(100 * time.Millisecond)
 			}
 		}
 	}()
@@ -67,10 +57,28 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 			case "encoderClick":
 				renderEnd <- true
 				return "browser"
+			case "menu":
+				renderEnd <- true
+				return "soundfonts"
 			}
 		}
 	}
 }
+
 func (m *Status) Name() string {
 	return "status"
+}
+
+func (m *Status) render() {
+	go m.c.display.RenderStatus(
+		lcd.StatusScreen{
+			Title: strings.TrimSuffix(
+				m.c.player.GetPlayingSong(),
+				filepath.Ext(m.c.player.GetPlayingSong())),
+			Tempo:    m.c.player.GetBPM(),
+			Volume:   "100%",
+			Progress: m.c.player.GetProgress(),
+			State:    m.c.player.GetState(),
+		},
+	)
 }

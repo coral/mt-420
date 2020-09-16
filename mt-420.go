@@ -79,7 +79,7 @@ func main() {
 
 	//Player
 	p, err := player.New(player.Configuration{
-		SoundFont:    "files/SC-55.sf2",
+		SoundFont:    "files/soundfonts/SC-55.sf2",
 		AudioBackend: backend,
 	})
 	defer p.Close()

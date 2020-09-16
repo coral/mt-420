@@ -8,8 +8,9 @@ import (
 )
 
 var Options = map[string]Option{
-	"status":  &Status{},
-	"browser": &Browser{},
+	"status":     &Status{},
+	"browser":    &Browser{},
+	"soundfonts": &SoundFonts{},
 }
 
 type Controller struct {
@@ -40,9 +41,14 @@ func (c *Controller) Start() {
 		msgChan := c.panel.GetEvents()
 		for {
 			e := <-msgChan
-			if e == "escape" {
+			switch e {
+			case "escape":
 				quit <- true
-			} else {
+			case "pause":
+				c.player.Pause()
+			case "stop":
+				c.player.Stop()
+			default:
 				evProp <- e
 			}
 		}

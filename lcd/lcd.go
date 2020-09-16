@@ -18,6 +18,7 @@ type LCD struct {
 	buffer       [4]string
 	serialConfig *serial.Config
 	conn         *serial.Port
+	lastrender   time.Time
 }
 
 type StatusScreen struct {
@@ -74,6 +75,7 @@ func (l *LCD) Init() error {
 		////Set backlight
 		s.Write([]byte{0xFE, 0xD0, 0xFF, 0xFF, 0x00})
 		time.Sleep(10 * time.Millisecond)
+
 	}
 
 	return nil
@@ -84,12 +86,20 @@ func (l *LCD) Init() error {
 func (l *LCD) RenderStatus(s StatusScreen) {
 	l.Clear()
 	if s.State == "PLAYING" {
+		l.SetColor(0, 255, 0)
+		l.buffer[0] = "PLAYING:"
+		l.buffer[1] = s.Title
+		l.buffer[2] = l.progressBar(s.Progress)
+		l.buffer[3] = "TEMPO: " + s.Tempo
+	} else if s.State == "PAUSED" {
+		l.SetColor(255, 60, 0)
 		l.buffer[0] = "PLAYING:"
 		l.buffer[1] = s.Title
 		l.buffer[2] = l.progressBar(s.Progress)
 		l.buffer[3] = "TEMPO: " + s.Tempo
 	} else {
-		l.buffer[0] = "ATP MT-420"
+		l.buffer[1] = "     ATP MT-420"
+		l.buffer[2] = " FLOPPY MIDI PLAYER"
 	}
 	l.render()
 }
@@ -183,6 +193,8 @@ func (l *LCD) render() {
 				l.conn.Write(append([]byte(data), []byte{0x0D, 0x0A}...))
 			}
 		}
+
+		l.lastrender = time.Now()
 	}
 
 }
@@ -196,10 +208,22 @@ func (l *LCD) trim(si string) string {
 
 func (l *LCD) progressBar(x float64) string {
 	var ic float64 = 0.18
-	pg := int(math.Ceil(ic * x))
-	template := "I                 I"
-	for i := 0; i < pg; i++ {
-		template = template[:i] + "-" + template[1:]
+	var pg int
+	pg = int(math.Ceil(ic * x))
+	if x > 95 {
+		pg = int(math.Floor(ic * x))
 	}
-	return template
+	template := []rune("I                  I")
+	for i := 0; i < pg; i++ {
+
+		template[i+1] = '-'
+		if pg == 1 {
+			template[i+1] = '>'
+		} else if pg != 18 {
+			template[i+2] = '>'
+		}
+
+	}
+
+	return string(template)
 }
