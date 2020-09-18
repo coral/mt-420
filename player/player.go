@@ -2,7 +2,8 @@ package player
 
 import (
 	"os"
-	"strconv"
+	"path"
+	"runtime"
 
 	"github.com/coral/fluidsynth2"
 )
@@ -18,8 +19,9 @@ const (
 )
 
 type Configuration struct {
-	SoundFont    string
-	AudioBackend string
+	SoundBank        string
+	DefaultSoundFont string
+	AudioBackend     string
 }
 
 type Player struct {
@@ -36,10 +38,19 @@ type Player struct {
 
 func New(c Configuration) (*Player, error) {
 	sd := fluidsynth2.NewSettings()
+	if c.AudioBackend == "" {
+		os := runtime.GOOS
+		switch os {
+		case "darwin":
+			c.AudioBackend = "coreaudio"
+		case "linux":
+			c.AudioBackend = "alsa"
+		}
+	}
 	sd.SetString("audio.driver", c.AudioBackend)
 
 	sy := fluidsynth2.NewSynth(sd)
-	lf, err := sy.SFLoad(c.SoundFont, false)
+	lf, err := sy.SFLoad(path.Join(c.SoundBank, c.DefaultSoundFont), false)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +122,7 @@ func (p *Player) SwitchSoundFont(f os.FileInfo) error {
 		return err
 	}
 
-	lf, err := p.synth.SFLoad("files/soundfonts/"+f.Name(), false)
+	lf, err := p.synth.SFLoad(path.Join(p.Config.SoundBank, f.Name()), false)
 	if err != nil {
 		return err
 	}
@@ -121,8 +132,13 @@ func (p *Player) SwitchSoundFont(f os.FileInfo) error {
 	return nil
 }
 
-func (p *Player) GetBPM() string {
-	return strconv.Itoa(p.fsPlayer.GetBPM()) + " BPM"
+func (p *Player) GetBPM() int {
+	return p.fsPlayer.GetBPM()
+}
+
+func (p *Player) ChangeTempo(t int) {
+	v := p.fsPlayer.GetBPM()
+	p.fsPlayer.SetBPM(v + t)
 }
 
 func (p *Player) GetPlayingSong() string {

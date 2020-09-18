@@ -11,6 +11,7 @@ type Browser struct {
 func (m *Browser) Run(c *Controller, events <-chan string, end chan bool) string {
 
 	c.display.SetColor(0, 255, 255)
+	c.panel.SetEncoderColor(0, 120, 255)
 	update := make(chan bool, 1)
 	update <- true
 	files := c.storage.ListFiles()

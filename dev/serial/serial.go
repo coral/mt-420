@@ -12,11 +12,18 @@ func main() {
 	if err != nil {
 		panic("Cannot open client")
 	}
+
+	fmt.Println("HELLO")
 	//	c.SetPinMode(2, firmata.Input)
 	//c.SetPinMode(3, firmata.Input)
 	fmt.Println(c.SetPinMode(6, firmata.PWM))
-	//fmt.Println(c.EnableAnalogInput(0, true))
-	//	fmt.Println(c.EnableDigitalInput(2, true))
+
+	err = c.EnableEncoder(1, 2, 3)
+	if err != nil {
+		fmt.Println(err)
+	}
+	//fmt.Println(c.EnableAnalogInput(12, true))
+	fmt.Println(c.EnableDigitalInput(12, true))
 	//fmt.Println(c.EnableDigitalInput(3, true))
 	var i = 0
 	for {

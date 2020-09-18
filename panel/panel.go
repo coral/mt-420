@@ -1,16 +1,16 @@
 package panel
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/baol/go-firmata"
 	"github.com/eiannone/keyboard"
 	"github.com/sirupsen/logrus"
+	"github.com/tarm/serial"
 )
 
 type Panel struct {
-	cf      *firmata.FirmataClient
+	config  *serial.Config
+	port    *serial.Port
 	logger  *logrus.Logger
 	device  string
 	layout  Layout
@@ -19,27 +19,26 @@ type Panel struct {
 }
 
 type Layout struct {
-	Buttons map[uint]Button
-	LEDs    map[string]LED
-	RGB     map[string]RGBLED
+	Buttons map[byte]Button
+	Enc     Encoder
 }
 
 type Button struct {
 	Name  string
-	Pin   uint
-	Value bool
+	Value byte
 }
 
-type LED struct {
-	Name string
-	Pin  uint
+type Encoder struct {
+	Name  string
+	Left  byte
+	Right byte
+	LED   RGBLED
 }
 
 type RGBLED struct {
-	Name     string
-	RedPin   uint
-	GreenPin uint
-	BluePin  uint
+	Red   byte
+	Green byte
+	Blue  byte
 }
 
 func New(device string, virtual bool, logger *logrus.Logger) *Panel {
@@ -48,8 +47,7 @@ func New(device string, virtual bool, logger *logrus.Logger) *Panel {
 		device: device,
 		logger: logger,
 		layout: Layout{
-			Buttons: make(map[uint]Button),
-			LEDs:    make(map[string]LED),
+			Buttons: make(map[byte]Button),
 		},
 		events:  make(chan string, 1),
 		virtual: virtual,
@@ -58,14 +56,15 @@ func New(device string, virtual bool, logger *logrus.Logger) *Panel {
 
 func (p *Panel) Init() error {
 	if !p.virtual {
-		c, err := firmata.NewClient(p.device, 57600)
+		p.config = &serial.Config{Name: p.device, Baud: 115200}
+		port, err := serial.OpenPort(p.config)
 		if err != nil {
 			return err
 		}
 
-		p.cf = c
+		p.port = port
 
-		go p.scan(c.GetValues())
+		go p.scan()
 	} else {
 		if err := keyboard.Open(); err != nil {
 			panic(err)
@@ -77,74 +76,47 @@ func (p *Panel) Init() error {
 }
 
 func (p *Panel) AddButton(name string, pin int) {
-	p.layout.Buttons[uint(pin)] = Button{
-		Name: name,
-		Pin:  uint(pin),
-	}
-	if !p.virtual {
-		p.cf.SetPinMode(byte(pin), firmata.Input)
-		p.cf.EnableDigitalInput(uint(pin), true)
+	p.layout.Buttons[byte(pin)] = Button{
+		Name:  name,
+		Value: byte(pin),
 	}
 }
 
-func (p *Panel) AddLED(name string, pin int) {
-	p.layout.LEDs[name] = LED{
-		Name: name,
-		Pin:  uint(pin),
-	}
-	p.cf.SetPinMode(byte(pin), firmata.PWM)
+func (p *Panel) AddEncoder(e Encoder) {
+	p.layout.Enc = e
 }
 
-func (p *Panel) SetLEDIntensity(name string, intensity byte) error {
-	if v, ok := p.layout.LEDs[name]; ok {
-		p.cf.AnalogWrite(v.Pin, intensity)
+func (p *Panel) SetEncoderColor(r int, g int, b int) {
+
+	if p.layout.Enc.LED.Red != byte(clamp(r)) || p.layout.Enc.LED.Green != byte(clamp(g)) || p.layout.Enc.LED.Blue != byte(clamp(b)) {
+		p.layout.Enc.LED.Red = byte(clamp(r))
+		p.layout.Enc.LED.Green = byte(clamp(g))
+		p.layout.Enc.LED.Blue = byte(clamp(b))
+
+		p.writeEncoderRGB()
 	}
-	return fmt.Errorf("No LED defined with this name")
 }
 
-func (p *Panel) AddRGBLED(name string, rpin int, gpin int, bpin int) {
-	p.layout.RGB[name] = RGBLED{
-		Name:     name,
-		RedPin:   uint(rpin),
-		GreenPin: uint(gpin),
-		BluePin:  uint(bpin),
-	}
-	p.cf.SetPinMode(byte(rpin), firmata.PWM)
-	p.cf.SetPinMode(byte(gpin), firmata.PWM)
-	p.cf.SetPinMode(byte(bpin), firmata.PWM)
+func (p *Panel) writeEncoderRGB() {
+	p.port.Write([]byte{0xCA, 0xFE, 0xBA, 0xBE, p.layout.Enc.LED.Red, p.layout.Enc.LED.Green, p.layout.Enc.LED.Blue})
 }
 
-func (p *Panel) SetRGBIntensity(name string, r byte, g byte, b byte) error {
-	if v, ok := p.layout.RGB[name]; ok {
-		p.cf.AnalogWrite(v.RedPin, r)
-		p.cf.AnalogWrite(v.GreenPin, g)
-		p.cf.AnalogWrite(v.BluePin, b)
-	}
-	return fmt.Errorf("No RGB LED defined with this name")
-}
+func (p *Panel) scan() {
 
-func (p *Panel) scan(v <-chan firmata.FirmataValue) {
+	buf := make([]byte, 1)
 	for {
-		update := <-v
-		if update.IsAnalog() {
+		n, _ := p.port.Read(buf)
+		if n > 0 {
 
-		} else {
-			_, u, err := update.GetDigitalValue()
-			if err != nil {
-				p.logger.WithFields(logrus.Fields{
-					"Error": err,
-				}).Error("GetDigitalValue error")
+			if b, ok := p.layout.Buttons[buf[0]]; ok {
+				p.events <- b.Name
 			}
 
-			for i, val := range u {
-				if b, ok := p.layout.Buttons[uint(i)]; ok {
-					if b.Value != val {
-						b.Value = val.(bool)
-						if val.(bool) {
-							p.events <- b.Name
-						}
-					}
-				}
+			if p.layout.Enc.Left == buf[0] {
+				p.events <- "encoderLeft"
+			}
+			if p.layout.Enc.Right == buf[0] {
+				p.events <- "encoderRight"
 			}
 		}
 	}
@@ -183,4 +155,14 @@ func (p *Panel) key() {
 
 func (p *Panel) GetEvents() <-chan string {
 	return p.events
+}
+
+func clamp(i int) int {
+	if i < 0 {
+		return 0
+	}
+	if i > 255 {
+		return 255
+	}
+	return i
 }

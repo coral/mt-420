@@ -4,7 +4,6 @@ import (
 	"flag"
 	"io"
 	"os"
-	"runtime"
 	"time"
 
 	"github.com/coral/mt-420/storage"
@@ -56,31 +55,31 @@ func main() {
 
 	delayWriter("Connecting to panel", delay, display)
 	// Panel
-	panel := panel.New("/dev/cu.usbmodem14444301", *virtual, log)
-	err = panel.Init()
+	frontPanel := panel.New("/dev/cu.usbmodem14444301", *virtual, log)
+	err = frontPanel.Init()
 	if err != nil {
 		panic(err)
 	}
 
-	panel.AddButton("play", 2)
-	panel.AddButton("escape", 3)
+	frontPanel.AddButton("play", 0x20)
+	frontPanel.AddButton("pause", 0x21)
+	frontPanel.AddButton("stop", 0x22)
+	frontPanel.AddButton("menu", 0x23)
+	frontPanel.AddButton("escape", 0x24)
+	frontPanel.AddButton("encoderClick", 0x25)
+
+	frontPanel.AddEncoder(panel.Encoder{
+		Left:  0x26,
+		Right: 0x27,
+	})
+	frontPanel.SetEncoderColor(0, 255, 0)
 
 	delayWriter("Loading Fluidsynth", delay, display)
 
-	var backend string
-
-	os := runtime.GOOS
-	switch os {
-	case "darwin":
-		backend = "coreaudio"
-	case "linux":
-		backend = "alsa"
-	}
-
 	//Player
 	p, err := player.New(player.Configuration{
-		SoundFont:    "files/soundfonts/SC-55.sf2",
-		AudioBackend: backend,
+		SoundBank:        "files/soundfonts",
+		DefaultSoundFont: "Roland SC-55.sf2",
 	})
 	defer p.Close()
 	if err != nil {
@@ -98,7 +97,7 @@ func main() {
 	storage.Init()
 
 	//Controller
-	controller := controller.New(p, panel, storage, display)
+	controller := controller.New(p, frontPanel, storage, display)
 	controller.Start()
 
 }

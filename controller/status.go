@@ -3,6 +3,7 @@ package controller
 import (
 	"math"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,7 +15,6 @@ type Status struct {
 }
 
 func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string {
-	//c.display.SetColor(0, 255, 0)
 	m.c = c
 	var renderEnd = make(chan bool)
 	m.render()
@@ -29,6 +29,17 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 				var ic float64 = 0.18
 				pg := int(math.Ceil(ic * c.player.GetProgress()))
 				st := c.player.GetState()
+
+				switch st {
+				case "PLAYING":
+					c.panel.SetEncoderColor(0, 255, 0)
+				case "PAUSED":
+					c.panel.SetEncoderColor(255, 255, 0)
+				case "DONE":
+					c.panel.SetEncoderColor(255, 255, 255)
+				case "READY":
+					c.panel.SetEncoderColor(255, 255, 255)
+				}
 
 				if progress != pg && state != "PAUSED" {
 					progress = pg
@@ -50,13 +61,19 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 		case <-end:
 			renderEnd <- true
 			return "status"
-		case m := <-events:
-			switch m {
+		case ev := <-events:
+			switch ev {
 			case "play":
 				//c.player.Play("files/passport.mid")
 			case "encoderClick":
 				renderEnd <- true
 				return "browser"
+			case "encoderRight":
+				c.player.ChangeTempo(+5)
+				m.render()
+			case "encoderLeft":
+				c.player.ChangeTempo(-5)
+				m.render()
 			case "menu":
 				renderEnd <- true
 				return "soundfonts"
@@ -70,12 +87,14 @@ func (m *Status) Name() string {
 }
 
 func (m *Status) render() {
+	t := strconv.Itoa(m.c.player.GetBPM())
+	t = t + " BPM"
 	go m.c.display.RenderStatus(
 		lcd.StatusScreen{
 			Title: strings.TrimSuffix(
 				m.c.player.GetPlayingSong(),
 				filepath.Ext(m.c.player.GetPlayingSong())),
-			Tempo:    m.c.player.GetBPM(),
+			Tempo:    t,
 			Volume:   "100%",
 			Progress: m.c.player.GetProgress(),
 			State:    m.c.player.GetState(),

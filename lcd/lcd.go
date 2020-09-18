@@ -44,7 +44,7 @@ func (l *LCD) Init() error {
 		cmd.Stdout = os.Stdout
 		cmd.Run()
 	} else {
-		l.serialConfig = &serial.Config{Name: "/dev/cu.usbmodem142444301", Baud: 9600}
+		l.serialConfig = &serial.Config{Name: "/dev/cu.usbmodem142444301", Baud: 115200}
 		s, err := serial.OpenPort(l.serialConfig)
 		if err != nil {
 			return err
