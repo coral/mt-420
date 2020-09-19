@@ -60,7 +60,7 @@ func main() {
 	display := lcd.New(lconfig.Lcd.Device, *terminalDisplay, log)
 	err = display.Init()
 	if err != nil {
-		panic("display fail")
+		panic(fmt.Sprintln("Display Fail", lconfig.Lcd.Device, err))
 	}
 	delayWriter("Starting MT-420", delay, display)
 
