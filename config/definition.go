@@ -1,30 +1,19 @@
 package config
-a
+
 type C struct {
 	Panel struct {
-		Buttons []struct {
-			Name string `json:"name"`
-			Gpio string `json:"gpio"`
-		} `json:"buttons"`
-		Rotary struct {
-			Name string `json:"name"`
-			Led  struct {
-				Name  string `json:"name"`
-				Red   string `json:"red"`
-				Green string `json:"green"`
-				Blue  string `json:"blue"`
-			} `json:"led"`
-			Button struct {
-				Name string `json:"name"`
-				Gpio string `json:"gpio"`
-			} `json:"button"`
-			EncoderLeft  string `json:"encoderLeft"`
-			EncoderRight string `json:"encoderRight"`
+		Device  string   `json:"device"`
+		Baud    int      `json:"baud"`
+		Buttons []Button `json:"buttons"`
+		Rotary  struct {
+			EncoderLeft  int `json:"encoderLeft"`
+			EncoderRight int `json:"encoderRight"`
 		} `json:"rotary"`
 	} `json:"panel"`
 	Lcd struct {
-		Device string `json:"device"`
-		Baud   int    `json:"baud"`
+		Device    string `json:"device"`
+		Baud      int    `json:"baud"`
+		BootDelay int    `json:"bootdelay"`
 	} `json:"lcd"`
 	Fluidsynth struct {
 		Soundfonts string `json:"soundfonts"`
@@ -34,4 +23,9 @@ type C struct {
 		Device     string `json:"device"`
 		Mountpoint string `json:"mountpoint"`
 	} `json:"floppy"`
+}
+
+type Button struct {
+	Name    string `json:"name"`
+	Message int    `json:"message,omitempty"`
 }

@@ -1,38 +1,46 @@
 {
   "panel": {
+    "device": "/dev/cu.usbmodem14444301",
+    "baud": 115200,
     "buttons": [
       {
         "name": "play",
-        "gpio": "GPIO2"
+        "message": 32
+      },
+      {
+        "name": "pause",
+        "message": 33
+      },
+      {
+        "name": "stop",
+        "message": 34
+      },
+      {
+        "name": "menu",
+        "message": 35
       },
       {
         "name": "escape",
-        "gpio": "GPIO3"
+        "message": 36
+      },
+      {
+        "name": "encoderClick",
+        "message": 37
       }
     ],
     "rotary": {
-      "name": "play",
-      "led": {
-        "name": "rotaryLED",
-        "red": "PWM1",
-        "green": "PWM2",
-        "blue": "PWM3"
-      },
-      "button": {
-        "name": "encoderClick",
-        "gpio": "GPIO2"
-      },
-      "encoderLeft": "GPIO17",
-      "encoderRight": "GPIO27"
+      "encoderLeft": 38,
+      "encoderRight": 39
     }
   },
   "lcd": {
     "device": "/dev/cu.usbmodem142444301",
-    "baud": 115200
+    "baud": 115200,
+    "bootdelay": 0
   },
   "fluidsynth": {
     "soundfonts": "files/soundfonts",
-    "default": "SC-55.sf2"
+    "default": "Roland SC-55.sf2"
   },
   "floppy": {
     "device": "/dev/sdb",

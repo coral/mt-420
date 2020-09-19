@@ -16,6 +16,7 @@ type Panel struct {
 	layout  Layout
 	events  chan string
 	virtual bool
+	baud    int
 }
 
 type Layout struct {
@@ -41,10 +42,11 @@ type RGBLED struct {
 	Blue  byte
 }
 
-func New(device string, virtual bool, logger *logrus.Logger) *Panel {
+func New(device string, baud int, virtual bool, logger *logrus.Logger) *Panel {
 
 	return &Panel{
 		device: device,
+		baud:   baud,
 		logger: logger,
 		layout: Layout{
 			Buttons: make(map[byte]Button),
@@ -56,7 +58,7 @@ func New(device string, virtual bool, logger *logrus.Logger) *Panel {
 
 func (p *Panel) Init() error {
 	if !p.virtual {
-		p.config = &serial.Config{Name: p.device, Baud: 115200}
+		p.config = &serial.Config{Name: p.device, Baud: p.baud}
 		port, err := serial.OpenPort(p.config)
 		if err != nil {
 			return err

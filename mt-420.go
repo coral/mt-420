@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/coral/mt-420/config"
 	"github.com/coral/mt-420/storage"
 
 	"github.com/coral/mt-420/controller"
@@ -29,19 +30,35 @@ func (e ErrorShim) Write(data []byte) (n int, err error) {
 }
 
 func main() {
+
+	///////////////////////////////////////////
+	//FLAGS
+	///////////////////////////////////////////
 	virtual := flag.Bool("virtual", false, "virtual")
 	terminalDisplay := flag.Bool("tdisp", false, "terminal display")
 	mockFS := flag.Bool("mock", false, "mock")
-
+	mockPath := flag.String("mockPath", "files/midi", "where to look for mock filesystem")
+	configPath := flag.String("config", "config.json", "path to configuration")
 	flag.Parse()
-	delay := 0
+
+	///////////////////////////////////////////
+	//LOAD CONFIG
+	///////////////////////////////////////////
+	lconfig, err := config.Load(*configPath)
+	if err != nil {
+		panic("could not load config : " + *configPath)
+	}
+
+	delay := lconfig.Lcd.BootDelay
 
 	log := logrus.New()
 	log.SetLevel(logrus.WarnLevel)
 
+	///////////////////////////////////////////
 	//LCD
-	display := lcd.New("/dev/cu.usbmodem142444301", *terminalDisplay, log)
-	err := display.Init()
+	///////////////////////////////////////////
+	display := lcd.New(lconfig.Lcd.Device, *terminalDisplay, log)
+	err = display.Init()
 	if err != nil {
 		panic("display fail")
 	}
@@ -53,50 +70,52 @@ func main() {
 	mw := io.MultiWriter(os.Stdout, ersh)
 	log.SetOutput(mw)
 
-	delayWriter("Connecting to panel", delay, display)
+	///////////////////////////////////////////
 	// Panel
-	frontPanel := panel.New("/dev/cu.usbmodem14444301", *virtual, log)
+	//////////////////////////////////////////
+	delayWriter("Connecting to panel", delay, display)
+	frontPanel := panel.New(lconfig.Panel.Device, lconfig.Panel.Baud, *virtual, log)
 	err = frontPanel.Init()
 	if err != nil {
 		panic(err)
 	}
-
-	frontPanel.AddButton("play", 0x20)
-	frontPanel.AddButton("pause", 0x21)
-	frontPanel.AddButton("stop", 0x22)
-	frontPanel.AddButton("menu", 0x23)
-	frontPanel.AddButton("escape", 0x24)
-	frontPanel.AddButton("encoderClick", 0x25)
+	for _, be := range lconfig.Panel.Buttons {
+		frontPanel.AddButton(be.Name, be.Message)
+	}
 
 	frontPanel.AddEncoder(panel.Encoder{
-		Left:  0x26,
-		Right: 0x27,
+		Left:  byte(lconfig.Panel.Rotary.EncoderLeft),
+		Right: byte(lconfig.Panel.Rotary.EncoderRight),
 	})
-	frontPanel.SetEncoderColor(0, 255, 0)
 
+	///////////////////////////////////////////
+	// Fluidsynth
+	//////////////////////////////////////////
 	delayWriter("Loading Fluidsynth", delay, display)
-
-	//Player
 	p, err := player.New(player.Configuration{
-		SoundBank:        "files/soundfonts",
-		DefaultSoundFont: "Roland SC-55.sf2",
+		SoundBank:        lconfig.Fluidsynth.Soundfonts,
+		DefaultSoundFont: lconfig.Fluidsynth.Default,
 	})
 	defer p.Close()
 	if err != nil {
 		panic(err)
 	}
 
+	///////////////////////////////////////////
+	// Floppy
+	//////////////////////////////////////////
 	delayWriter("Warming up floppy", delay, display)
-	//Floppy
 	var storage storage.Storage
 	if *mockFS {
-		storage = mock.New("files/midi")
+		storage = mock.New(*mockPath)
 	} else {
-		storage = floppy.New("/dev/sdb", "/media/floppy")
+		storage = floppy.New(lconfig.Floppy.Device, lconfig.Floppy.Mountpoint)
 	}
 	storage.Init()
 
-	//Controller
+	///////////////////////////////////////////
+	// Controller
+	//////////////////////////////////////////
 	controller := controller.New(p, frontPanel, storage, display)
 	controller.Start()
 
