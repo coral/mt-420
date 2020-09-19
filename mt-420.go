@@ -77,7 +77,7 @@ func main() {
 	frontPanel := panel.New(lconfig.Panel.Device, lconfig.Panel.Baud, *virtual, log)
 	err = frontPanel.Init()
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintln("Panel Fail", lconfig.Panel.Device, err))
 	}
 	for _, be := range lconfig.Panel.Buttons {
 		frontPanel.AddButton(be.Name, be.Message)
