@@ -45,7 +45,10 @@ func (f *Floppy) ListFiles() []os.FileInfo {
 
 	for _, file := range files {
 		if !file.IsDir() {
-			if filepath.Ext(file.Name()) == ".mid" || filepath.Ext(file.Name()) == ".midi" {
+			if filepath.Ext(file.Name()) == ".mid" ||
+				filepath.Ext(file.Name()) == ".midi" ||
+				!strings.HasPrefix(".", file.Name()) {
+
 				t = append(t, file)
 			}
 		}
