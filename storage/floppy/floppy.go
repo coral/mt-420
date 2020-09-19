@@ -36,6 +36,10 @@ func (f *Floppy) Init() {
 }
 
 func (f *Floppy) ListFiles() []os.FileInfo {
+	if f.mnt() {
+		time.Sleep(100 * time.Millisecond)
+	}
+
 	files, err := ioutil.ReadDir(f.mountpoint)
 	if err != nil {
 		log.Fatal(err)
@@ -45,11 +49,11 @@ func (f *Floppy) ListFiles() []os.FileInfo {
 
 	for _, file := range files {
 		if !file.IsDir() {
-			if filepath.Ext(file.Name()) == ".mid" ||
-				filepath.Ext(file.Name()) == ".midi" ||
-				!strings.HasPrefix(".", file.Name()) {
+			if !strings.HasPrefix(file.Name(), ".") {
+				if filepath.Ext(file.Name()) == ".mid" || filepath.Ext(file.Name()) == ".midi" {
 
-				t = append(t, file)
+					t = append(t, file)
+				}
 			}
 		}
 	}
@@ -63,6 +67,19 @@ func (m *Floppy) LoadFile(f os.FileInfo) ([]byte, error) {
 		return nil, err
 	}
 	return dat, nil
+}
+
+func (m *Floppy) mnt() bool {
+	if !m.checkMountStatus() {
+		err := m.mountFloppy()
+		if err != nil {
+			m.mounted = true
+			return true
+		}
+	}
+
+	m.mounted = false
+	return false
 }
 
 func (m *Floppy) checkMountStatus() bool {
