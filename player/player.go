@@ -138,7 +138,10 @@ func (p *Player) SwitchSoundFont(f os.FileInfo) error {
 }
 
 func (p *Player) GetBPM() int {
-	return p.fsPlayer.GetBPM()
+	if p.loaded {
+		return p.fsPlayer.GetBPM()
+	}
+	return 0
 }
 
 func (p *Player) ChangeTempo(t int) {
@@ -147,9 +150,11 @@ func (p *Player) ChangeTempo(t int) {
 }
 
 func (p *Player) GetPlayingSong() string {
-	pm := p.fsPlayer.GetStatus()
-	if pm == "PLAYING" || pm == "DONE" {
-		return p.filename
+	if p.loaded {
+		pm := p.fsPlayer.GetStatus()
+		if pm == "PLAYING" || pm == "DONE" {
+			return p.filename
+		}
 	}
 
 	return ""
@@ -157,19 +162,24 @@ func (p *Player) GetPlayingSong() string {
 }
 
 func (p *Player) GetState() string {
-	st := p.fsPlayer.GetStatus()
-	if st == "DONE" && p.state == PAUSED {
-		return string(PAUSED)
+	if p.loaded {
+		st := p.fsPlayer.GetStatus()
+		if st == "DONE" && p.state == PAUSED {
+			return string(PAUSED)
+		}
+		p.state = State(st)
+		return string(p.state)
 	}
-	p.state = State(st)
-	return string(p.state)
+	return string(DONE)
 }
 
 func (p *Player) GetProgress() float64 {
-	curr := p.fsPlayer.GetCurrentTick()
-	total := p.fsPlayer.GetTotalTicks()
-	if total > 0 {
-		return float64(curr) / float64(total) * 100
+	if p.loaded {
+		curr := p.fsPlayer.GetCurrentTick()
+		total := p.fsPlayer.GetTotalTicks()
+		if total > 0 {
+			return float64(curr) / float64(total) * 100
+		}
 	}
 	return 0
 }
