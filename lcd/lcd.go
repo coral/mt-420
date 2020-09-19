@@ -198,7 +198,6 @@ func (l *LCD) render() {
 			} else {
 				l.conn.Write(append([]byte(data), []byte{0x0D, 0x0A}...))
 			}
-			time.Sleep(2 * time.Millisecond)
 		}
 
 		l.lastrender = time.Now()

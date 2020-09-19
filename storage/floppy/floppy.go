@@ -28,10 +28,6 @@ func New(device string, mountpoint string) *Floppy {
 func (f *Floppy) Init() {
 	if f.checkMountStatus() {
 		f.mounted = true
-	} else {
-		fmt.Println(f.mountFloppy())
-		time.Sleep(1 * time.Second)
-		f.Init()
 	}
 }
 
