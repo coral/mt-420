@@ -100,13 +100,12 @@ func (p *Player) Pause() {
 
 func (p *Player) Stop() {
 
-	p.fsPlayer.Stop()
 	if p.loaded {
+		p.fsPlayer.Stop()
 		p.fsPlayer.Close()
 		p.loaded = false
+		p.state = State(p.fsPlayer.GetStatus())
 	}
-	p.state = State(p.fsPlayer.GetStatus())
-
 }
 
 func (p *Player) SwitchSoundFont(f os.FileInfo) error {
