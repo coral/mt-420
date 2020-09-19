@@ -29,7 +29,7 @@ func (f *Floppy) Init() {
 	if f.checkMountStatus() {
 		f.mounted = true
 	} else {
-		f.mountFloppy()
+		fmt.Println(f.mountFloppy())
 		time.Sleep(1 * time.Second)
 		f.Init()
 	}
