@@ -3,6 +3,7 @@ package controller
 import (
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 type Browser struct {
@@ -64,6 +65,7 @@ func (m *Browser) Run(c *Controller, events <-chan string, end chan bool) string
 					c.player.Play(files[selector.Value()].Name(), d)
 				}
 				renderEnd <- true
+				time.Sleep(50 * time.Millisecond)
 				return "status"
 			}
 		}

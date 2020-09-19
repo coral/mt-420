@@ -35,6 +35,7 @@ type Player struct {
 	filename   string
 	loaded     bool
 	loadedFont int
+	fontname   string
 }
 
 func New(c Configuration) (*Player, error) {
@@ -65,16 +66,13 @@ func New(c Configuration) (*Player, error) {
 		driver:     fluidsynth2.NewAudioDriver(sd, sy),
 		fsPlayer:   fluidsynth2.NewPlayer(sy),
 		loadedFont: lf,
+		fontname:   c.DefaultSoundFont,
 	}, nil
 }
 
 func (p *Player) Play(filename string, data []byte) error {
 
-	p.fsPlayer.Stop()
-	if p.loaded {
-		p.fsPlayer.Close()
-		p.loaded = false
-	}
+	p.Stop()
 	p.fsPlayer = fluidsynth2.NewPlayer(p.synth)
 
 	p.filename = filename
@@ -120,16 +118,20 @@ func (p *Player) SwitchSoundFont(f os.FileInfo) error {
 		p.loaded = false
 	}
 
-	err := p.synth.SFUnload(p.loadedFont, true)
-	if err != nil {
-		return err
-	}
+	if path.Base(f.Name()) != p.fontname {
 
-	lf, err := p.synth.SFLoad(path.Join(p.Config.SoundBank, f.Name()), false)
-	if err != nil {
-		return err
+		err := p.synth.SFUnload(p.loadedFont, true)
+		if err != nil {
+			return err
+		}
+
+		lf, err := p.synth.SFLoad(path.Join(p.Config.SoundBank, f.Name()), false)
+		if err != nil {
+			return err
+		}
+
+		p.loadedFont = lf
 	}
-	p.loadedFont = lf
 	p.state = "READY"
 
 	return nil
