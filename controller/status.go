@@ -70,10 +70,10 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 				return "browser"
 			case "encoderRight":
 				c.player.ChangeTempo(+5)
-				m.render()
+				m.renderTempo()
 			case "encoderLeft":
 				c.player.ChangeTempo(-5)
-				m.render()
+				m.renderTempo()
 			case "menu":
 				renderEnd <- true
 				return "soundfonts"
@@ -100,4 +100,10 @@ func (m *Status) render() {
 			State:    m.c.player.GetState(),
 		},
 	)
+}
+
+func (m *Status) renderTempo() {
+	t := strconv.Itoa(m.c.player.GetBPM())
+	t = t + " BPM  "
+	m.c.display.WriteFrom(4, 8, t)
 }

@@ -95,6 +95,7 @@ func main() {
 	p, err := player.New(player.Configuration{
 		SoundBank:        lconfig.Fluidsynth.Soundfonts,
 		DefaultSoundFont: lconfig.Fluidsynth.Default,
+		Gain:             lconfig.Fluidsynth.Gain,
 	})
 	defer p.Close()
 	if err != nil {

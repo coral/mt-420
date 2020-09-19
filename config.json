@@ -40,7 +40,8 @@
   },
   "fluidsynth": {
     "soundfonts": "files/soundfonts",
-    "default": "Roland SC-55.sf2"
+    "default": "Roland SC-55.sf2",
+    "gain": 1.0
   },
   "floppy": {
     "device": "/dev/sdb",

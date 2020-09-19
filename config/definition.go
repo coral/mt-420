@@ -16,8 +16,9 @@ type C struct {
 		BootDelay int    `json:"bootdelay"`
 	} `json:"lcd"`
 	Fluidsynth struct {
-		Soundfonts string `json:"soundfonts"`
-		Default    string `json:"default"`
+		Soundfonts string  `json:"soundfonts"`
+		Default    string  `json:"default"`
+		Gain       float32 `json:"gain"`
 	} `json:"fluidsynth"`
 	Floppy struct {
 		Device     string `json:"device"`

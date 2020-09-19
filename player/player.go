@@ -22,6 +22,7 @@ type Configuration struct {
 	SoundBank        string
 	DefaultSoundFont string
 	AudioBackend     string
+	Gain             float32
 }
 
 type Player struct {
@@ -54,6 +55,8 @@ func New(c Configuration) (*Player, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	sy.SetGain(c.Gain)
 
 	return &Player{
 		Config:     c,

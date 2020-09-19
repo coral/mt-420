@@ -168,6 +168,12 @@ func (l *LCD) SetColor(r byte, g byte, b byte) {
 	time.Sleep(10 * time.Millisecond)
 }
 
+func (l *LCD) WriteFrom(x int, y int, str string) {
+	l.conn.Write([]byte{0xFE, 0x47, byte(y), byte(x)})
+	time.Sleep(5 * time.Millisecond)
+	l.conn.Write([]byte(str))
+}
+
 //////INTERNAL
 
 func (l *LCD) writeLine(line string, index int) {
