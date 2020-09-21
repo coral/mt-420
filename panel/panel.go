@@ -100,7 +100,9 @@ func (p *Panel) SetEncoderColor(r int, g int, b int) {
 }
 
 func (p *Panel) writeEncoderRGB() {
-	p.port.Write([]byte{0xCA, 0xFE, 0xBA, 0xBE, p.layout.Enc.LED.Red, p.layout.Enc.LED.Green, p.layout.Enc.LED.Blue})
+	if !p.virtual {
+		p.port.Write([]byte{0xCA, 0xFE, 0xBA, 0xBE, p.layout.Enc.LED.Red, p.layout.Enc.LED.Green, p.layout.Enc.LED.Blue})
+	}
 }
 
 func (p *Panel) scan() {

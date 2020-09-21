@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -59,7 +58,7 @@ func (m *SoundFonts) Run(c *Controller, events <-chan string, end chan bool) str
 				if len(files) > 0 {
 					err := c.player.SwitchSoundFont(files[selector.Value()])
 					if err != nil {
-						fmt.Println(err)
+						go c.display.Error(err)
 					}
 				}
 				renderEnd <- true

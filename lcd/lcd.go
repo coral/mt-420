@@ -163,9 +163,11 @@ func (l *LCD) Clear() {
 }
 
 func (l *LCD) SetColor(r byte, g byte, b byte) {
+	if !l.virtual {
 	////Set backlight
 	l.conn.Write([]byte{0xFE, 0xD0, r, g, b})
 	time.Sleep(10 * time.Millisecond)
+	}
 }
 
 func (l *LCD) WriteFrom(x int, y int, str string) {
