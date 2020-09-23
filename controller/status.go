@@ -38,7 +38,7 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 				case "DONE":
 					c.panel.SetEncoderColor(255, 255, 255)
 				case "READY":
-					c.panel.SetEncoderColor(255, 255, 255)
+					c.panel.SetEncoderColor(255, 0, 0)
 				}
 
 				if progress != pg && state != "PAUSED" {
