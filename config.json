@@ -1,6 +1,6 @@
 {
   "panel": {
-    "device": "/dev/cu.usbmodem14444301",
+    "device": "/dev/cu.usbmodem142444201",
     "baud": 115200,
     "buttons": [
       {
@@ -34,7 +34,7 @@
     }
   },
   "lcd": {
-    "device": "/dev/cu.usbmodem142444301",
+    "device": "/dev/cu.usbmodem142444401",
     "baud": 115200,
     "bootdelay": 0
   },
