@@ -1,0 +1,6 @@
+
+into /etc/udev/rules.d/99-usb-serial.rules
+
+
+KERNEL=="ttyACM*", ATTRS{product}=="Arduino Nano Every", SYMLINK+="panel"
+KERNEL=="ttyACM*", ATTRS{product}=="Adafruit Industries", SYMLINK+="lcd"
