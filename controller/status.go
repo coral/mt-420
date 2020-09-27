@@ -32,7 +32,7 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 
 				switch st {
 				case "PLAYING":
-					c.panel.SetEncoderColor(255, 255, 0)
+					c.panel.SetEncoderColor(0, 255, 0)
 				case "PAUSED":
 					c.panel.SetEncoderColor(255, 255, 0)
 				case "DONE":

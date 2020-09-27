@@ -5,23 +5,19 @@
     "buttons": [
       {
         "name": "play",
-        "message": 32
-      },
-      {
-        "name": "pause",
-        "message": 33
+        "message": 36
       },
       {
         "name": "stop",
-        "message": 34
-      },
-      {
-        "name": "menu",
         "message": 35
       },
       {
+        "name": "menu",
+        "message": 34
+      },
+      {
         "name": "escape",
-        "message": 36
+        "message": 33
       },
       {
         "name": "encoderClick",
@@ -36,7 +32,8 @@
   "lcd": {
     "device": "/dev/lcd",
     "baud": 115200,
-    "bootdelay": 0
+    "bootdelay": 0,
+    "contrast": 255
   },
   "fluidsynth": {
     "soundfonts": "files/soundfonts",

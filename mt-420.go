@@ -57,7 +57,7 @@ func main() {
 	///////////////////////////////////////////
 	//LCD
 	///////////////////////////////////////////
-	display := lcd.New(lconfig.Lcd.Device, *terminalDisplay, log)
+	display := lcd.New(lconfig.Lcd.Device, lconfig.Lcd.Contrast, *terminalDisplay, log)
 	err = display.Init()
 	if err != nil {
 		panic(fmt.Sprintln("Display Fail", lconfig.Lcd.Device, err))

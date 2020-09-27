@@ -14,6 +14,7 @@ type C struct {
 		Device    string `json:"device"`
 		Baud      int    `json:"baud"`
 		BootDelay int    `json:"bootdelay"`
+		Contrast  int    `json:"contrast"`
 	} `json:"lcd"`
 	Fluidsynth struct {
 		Soundfonts string  `json:"soundfonts"`

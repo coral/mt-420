@@ -15,6 +15,7 @@ type LCD struct {
 	logger       *logrus.Logger
 	device       string
 	virtual      bool
+	contrast     int
 	buffer       [4]string
 	serialConfig *serial.Config
 	conn         *serial.Port
@@ -29,12 +30,13 @@ type StatusScreen struct {
 	State    string
 }
 
-func New(device string, virtual bool, log *logrus.Logger) *LCD {
+func New(device string, contrast int, virtual bool, log *logrus.Logger) *LCD {
 	return &LCD{
-		logger:  log,
-		device:  device,
-		virtual: virtual,
-		buffer:  [4]string{"", "", "", ""},
+		logger:   log,
+		device:   device,
+		contrast: contrast,
+		virtual:  virtual,
+		buffer:   [4]string{"", "", "", ""},
 	}
 }
 
@@ -69,7 +71,7 @@ func (l *LCD) Init() error {
 		time.Sleep(10 * time.Millisecond)
 
 		//Set contrast
-		s.Write([]byte{0xFE, 0x50, 200})
+		s.Write([]byte{0xFE, 0x50, byte(l.contrast)})
 		time.Sleep(10 * time.Millisecond)
 
 		////Set backlight
@@ -164,9 +166,9 @@ func (l *LCD) Clear() {
 
 func (l *LCD) SetColor(r byte, g byte, b byte) {
 	if !l.virtual {
-	////Set backlight
-	l.conn.Write([]byte{0xFE, 0xD0, r, g, b})
-	time.Sleep(10 * time.Millisecond)
+		////Set backlight
+		l.conn.Write([]byte{0xFE, 0xD0, r, g, b})
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
