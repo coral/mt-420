@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/coral/mt-420/config"
+	"github.com/coral/mt-420/panel/kb"
+	"github.com/coral/mt-420/panel/mtpanel"
 	"github.com/coral/mt-420/storage"
 
 	"github.com/coral/mt-420/controller"
@@ -74,19 +76,28 @@ func main() {
 	// Panel
 	//////////////////////////////////////////
 	delayWriter("Connecting to panel", delay, display)
-	frontPanel := panel.New(lconfig.Panel.Device, lconfig.Panel.Baud, *virtual, log)
-	err = frontPanel.Init()
-	if err != nil {
-		panic(fmt.Sprintln("Panel Fail", lconfig.Panel.Device, err))
-	}
-	for _, be := range lconfig.Panel.Buttons {
-		frontPanel.AddButton(be.Name, be.Message)
-	}
+	var frontPanel panel.Panel
+	if *virtual {
+		frontPanel = kb.New()
+		err = frontPanel.Init()
+		if err != nil {
+			panic(fmt.Sprintln("Panel Fail", lconfig.Panel.Device, err))
+		}
+	} else {
+		frontPanel = mtpanel.New(lconfig.Panel.Device, lconfig.Panel.Baud, log)
+		err = frontPanel.Init()
+		if err != nil {
+			panic(fmt.Sprintln("Panel Fail", lconfig.Panel.Device, err))
+		}
+		for _, be := range lconfig.Panel.Buttons {
+			frontPanel.AddButton(be.Name, be.Message)
+		}
 
-	frontPanel.AddEncoder(panel.Encoder{
-		Left:  byte(lconfig.Panel.Rotary.EncoderLeft),
-		Right: byte(lconfig.Panel.Rotary.EncoderRight),
-	})
+		frontPanel.AddEncoder(panel.Encoder{
+			Left:  byte(lconfig.Panel.Rotary.EncoderLeft),
+			Right: byte(lconfig.Panel.Rotary.EncoderRight),
+		})
+	}
 
 	///////////////////////////////////////////
 	// Fluidsynth

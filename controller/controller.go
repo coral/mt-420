@@ -15,14 +15,14 @@ var Options = map[string]Option{
 
 type Controller struct {
 	player  *player.Player
-	panel   *panel.Panel
+	panel   panel.Panel
 	storage storage.Storage
 	display *lcd.LCD
 
 	state string
 }
 
-func New(player *player.Player, panel *panel.Panel, storage storage.Storage, l *lcd.LCD) *Controller {
+func New(player *player.Player, panel panel.Panel, storage storage.Storage, l *lcd.LCD) *Controller {
 	return &Controller{
 		player:  player,
 		panel:   panel,
