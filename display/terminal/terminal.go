@@ -32,6 +32,11 @@ func (t *Terminal) WriteBuffer(buf [4]string) {
 	t.buffer = buf
 	t.Render()
 }
+
+func (t *Terminal) ClearBuffer() {
+	t.buffer = [4]string{eb, eb, eb, eb}
+}
+
 func (t *Terminal) WriteAt(x int, y int, str string) {
 	bl := t.buffer[x-1][:y]
 

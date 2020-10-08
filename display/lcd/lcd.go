@@ -140,6 +140,10 @@ func (l *LCD) WriteBuffer(newBuf [4]string) {
 
 }
 
+func (l *LCD) ClearBuffer() {
+	l.buffer = [4]string{eb, eb, eb, eb}
+}
+
 ///////////////////////////////////////////
 // WRITING
 ///////////////////////////////////////////
@@ -152,11 +156,12 @@ func (l *LCD) WriteAt(x int, y int, str string) {
 
 func (l *LCD) Render() {
 
-	//Clear LCD
+	//Jump to start
 	l.conn.Write([]byte{0xFE, 0x48})
 	time.Sleep(10 * time.Millisecond)
 	for _, val := range l.buffer {
 		l.conn.Write([]byte(l.trim(val)))
+		time.Sleep(4 * time.Millisecond)
 	}
 
 	l.lastrender = time.Now()
