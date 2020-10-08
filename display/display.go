@@ -1,5 +1,7 @@
 package display
 
+import "time"
+
 type Device interface {
 	Init() error
 
@@ -29,4 +31,12 @@ func Error(d Device, err error) {
 	d.ClearBuffer()
 	d.WriteAt(1, 1, "     - ERROR -")
 	d.WriteAt(2, 1, err.Error())
+}
+
+func DelayMessage(d Device, message string, delay int) {
+
+	//Yes this is dumb.
+	m := time.Duration(delay)
+	Message(d, message)
+	time.Sleep(m * time.Second)
 }

@@ -11,10 +11,11 @@ type C struct {
 		} `json:"rotary"`
 	} `json:"panel"`
 	Lcd struct {
-		Device    string `json:"device"`
-		Baud      int    `json:"baud"`
-		BootDelay int    `json:"bootdelay"`
-		Contrast  int    `json:"contrast"`
+		Device     string `json:"device"`
+		Baud       int    `json:"baud"`
+		BootDelay  int    `json:"bootdelay"`
+		Contrast   int    `json:"contrast"`
+		Brightness int    `json:"brightness"`
 	} `json:"lcd"`
 	Fluidsynth struct {
 		Soundfonts string  `json:"soundfonts"`

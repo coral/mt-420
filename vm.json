@@ -36,6 +36,8 @@
   "lcd": {
     "device": "/dev/ttyACM1",
     "baud": 115200,
+    "brightness": 255,
+    "contrast": 255,
     "bootdelay": 1
   },
   "fluidsynth": {

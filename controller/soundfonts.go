@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/coral/mt-420/display"
 )
 
 type SoundFonts struct {
@@ -33,8 +35,7 @@ func (m *SoundFonts) Run(c *Controller, events <-chan string, end chan bool) str
 			case <-renderEnd:
 				return
 			case <-update:
-				c.display.RenderList(fn, selector.value)
-
+				display.RenderList(c.display, fn, selector.value)
 			}
 		}
 	}()
@@ -58,7 +59,7 @@ func (m *SoundFonts) Run(c *Controller, events <-chan string, end chan bool) str
 				if len(files) > 0 {
 					err := c.player.SwitchSoundFont(files[selector.Value()])
 					if err != nil {
-						go c.display.Error(err)
+						display.Error(c.display, err)
 					}
 				}
 				renderEnd <- true

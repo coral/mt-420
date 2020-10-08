@@ -4,6 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/coral/mt-420/display"
 )
 
 type Browser struct {
@@ -33,9 +35,10 @@ func (m *Browser) Run(c *Controller, events <-chan string, end chan bool) string
 				return
 			case <-update:
 				if len(fn) > 0 {
-					c.display.RenderList(fn, selector.value)
+					display.RenderList(c.display, fn, selector.value)
 				} else {
-					c.display.Message("No files on floppy")
+					c.display.SetColor(255, 128, 0)
+					display.Message(c.display, "No files on floppy")
 				}
 			}
 		}
@@ -60,7 +63,7 @@ func (m *Browser) Run(c *Controller, events <-chan string, end chan bool) string
 				if len(files) > 0 {
 					d, err := c.storage.LoadFile(files[selector.Value()])
 					if err != nil {
-						c.display.Error(err)
+						display.Error(c.display, err)
 					}
 					c.player.Play(files[selector.Value()].Name(), d)
 				}

@@ -36,12 +36,14 @@
   "lcd": {
     "device": "/dev/cu.usbmodem142444401",
     "baud": 115200,
+    "brightness": 255,
+    "contrast": 255,
     "bootdelay": 0
   },
   "fluidsynth": {
     "soundfonts": "files/soundfonts",
     "default": "Roland SC-55.sf2",
-    "gain": 1.0
+    "gain": 0.5
   },
   "floppy": {
     "device": "/dev/sdb",

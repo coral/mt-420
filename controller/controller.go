@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/coral/mt-420/lcd"
+	"github.com/coral/mt-420/display"
 	"github.com/coral/mt-420/panel"
 	"github.com/coral/mt-420/player"
 	"github.com/coral/mt-420/storage"
@@ -17,12 +17,12 @@ type Controller struct {
 	player  *player.Player
 	panel   panel.Panel
 	storage storage.Storage
-	display *lcd.LCD
+	display display.Device
 
 	state string
 }
 
-func New(player *player.Player, panel panel.Panel, storage storage.Storage, l *lcd.LCD) *Controller {
+func New(player *player.Player, panel panel.Panel, storage storage.Storage, l display.Device) *Controller {
 	return &Controller{
 		player:  player,
 		panel:   panel,

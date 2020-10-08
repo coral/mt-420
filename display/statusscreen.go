@@ -1,6 +1,8 @@
 package display
 
-import "math"
+import (
+	"math"
+)
 
 type StatusScreen struct {
 	Tempo    string

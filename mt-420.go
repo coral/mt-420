@@ -2,17 +2,16 @@ package main
 
 import (
 	"flag"
-	"io"
-	"os"
-	"time"
 
 	"github.com/coral/mt-420/config"
+	"github.com/coral/mt-420/display"
+	"github.com/coral/mt-420/display/terminal"
 	"github.com/coral/mt-420/panel/kb"
 	"github.com/coral/mt-420/panel/mtpanel"
 	"github.com/coral/mt-420/storage"
 
 	"github.com/coral/mt-420/controller"
-	"github.com/coral/mt-420/lcd"
+	"github.com/coral/mt-420/display/lcd"
 	"github.com/coral/mt-420/panel"
 	"github.com/coral/mt-420/player"
 	"github.com/coral/mt-420/storage/floppy"
@@ -20,16 +19,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"golang.org/x/exp/errors/fmt"
 )
-
-type ErrorShim struct {
-	lcd *lcd.LCD
-}
-
-func (e ErrorShim) Write(data []byte) (n int, err error) {
-	e.lcd.Error(fmt.Errorf(string(data)))
-	fmt.Println(data)
-	return len(data), nil
-}
 
 func main() {
 
@@ -57,25 +46,27 @@ func main() {
 	log.SetLevel(logrus.WarnLevel)
 
 	///////////////////////////////////////////
-	//LCD
+	//DISPLAY
 	///////////////////////////////////////////
-	display := lcd.New(lconfig.Lcd.Device, lconfig.Lcd.Contrast, *terminalDisplay, log)
-	err = display.Init()
+	var dp display.Device
+	if *terminalDisplay {
+		dp = terminal.New()
+	} else {
+		dp = lcd.New(lconfig.Lcd.Device)
+	}
+	err = dp.Init()
 	if err != nil {
 		panic(fmt.Sprintln("Display Fail", lconfig.Lcd.Device, err))
 	}
-	delayWriter("Starting MT-420", delay, display)
+	dp.SetContrast(lconfig.Lcd.Contrast)
+	dp.SetBrightness(lconfig.Lcd.Brightness)
 
-	ersh := ErrorShim{
-		lcd: display,
-	}
-	mw := io.MultiWriter(os.Stdout, ersh)
-	log.SetOutput(mw)
+	display.DelayMessage(dp, "Starting MT-420", delay)
 
 	///////////////////////////////////////////
 	// Panel
 	//////////////////////////////////////////
-	delayWriter("Connecting to panel", delay, display)
+	display.DelayMessage(dp, "Connecting to panel", delay)
 	var frontPanel panel.Panel
 	if *virtual {
 		frontPanel = kb.New()
@@ -102,7 +93,7 @@ func main() {
 	///////////////////////////////////////////
 	// Fluidsynth
 	//////////////////////////////////////////
-	delayWriter("Loading Fluidsynth", delay, display)
+	display.DelayMessage(dp, "Loading Fluidsynth", delay)
 	p, err := player.New(player.Configuration{
 		SoundBank:        lconfig.Fluidsynth.Soundfonts,
 		DefaultSoundFont: lconfig.Fluidsynth.Default,
@@ -116,7 +107,7 @@ func main() {
 	///////////////////////////////////////////
 	// Floppy
 	//////////////////////////////////////////
-	delayWriter("Warming up floppy", delay, display)
+	display.DelayMessage(dp, "Warming up floppy", delay)
 	var storage storage.Storage
 	if *mockFS {
 		storage = mock.New(*mockPath)
@@ -128,13 +119,7 @@ func main() {
 	///////////////////////////////////////////
 	// Controller
 	//////////////////////////////////////////
-	controller := controller.New(p, frontPanel, storage, display)
+	controller := controller.New(p, frontPanel, storage, dp)
 	controller.Start()
 
-}
-
-func delayWriter(message string, delay int, l *lcd.LCD) {
-	m := time.Duration(delay)
-	l.Message(message)
-	time.Sleep(m * time.Second)
 }

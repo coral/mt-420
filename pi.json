@@ -33,6 +33,7 @@
     "device": "/dev/lcd",
     "baud": 115200,
     "bootdelay": 0,
+    "brightness": 255,
     "contrast": 255
   },
   "fluidsynth": {

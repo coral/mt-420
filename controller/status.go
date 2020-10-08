@@ -1,13 +1,14 @@
 package controller
 
 import (
+	"fmt"
 	"math"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/coral/mt-420/lcd"
+	"github.com/coral/mt-420/display"
 )
 
 type Status struct {
@@ -17,10 +18,14 @@ type Status struct {
 func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string {
 	m.c = c
 	var renderEnd = make(chan bool)
-	m.render()
+
+	if c.player.GetState() == "DONE" {
+		m.render()
+	}
+
 	go func() {
 		var progress = 0
-		var state string = "DONE"
+		var state string = c.player.GetState()
 		for {
 			select {
 			case <-renderEnd:
@@ -70,10 +75,12 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 				return "browser"
 			case "encoderRight":
 				c.player.ChangeTempo(+5)
-				m.renderTempo()
+				time.Sleep(10 * time.Millisecond)
+				m.render()
 			case "encoderLeft":
 				c.player.ChangeTempo(-5)
-				m.renderTempo()
+				time.Sleep(10 * time.Millisecond)
+				m.render()
 			case "menu":
 				renderEnd <- true
 				return "soundfonts"
@@ -89,21 +96,21 @@ func (m *Status) Name() string {
 func (m *Status) render() {
 	t := strconv.Itoa(m.c.player.GetBPM())
 	t = t + " BPM"
-	go m.c.display.RenderStatus(
-		lcd.StatusScreen{
+	fmt.Println(t)
+	go display.RenderStatus(m.c.display,
+		display.StatusScreen{
 			Title: strings.TrimSuffix(
 				m.c.player.GetPlayingSong(),
 				filepath.Ext(m.c.player.GetPlayingSong())),
 			Tempo:    t,
-			Volume:   "100%",
 			Progress: m.c.player.GetProgress(),
 			State:    m.c.player.GetState(),
 		},
 	)
 }
 
-func (m *Status) renderTempo() {
-	t := strconv.Itoa(m.c.player.GetBPM())
-	t = t + " BPM  "
-	m.c.display.WriteFrom(4, 8, t)
-}
+// func (m *Status) renderTempo() {
+// 	t := strconv.Itoa(m.c.player.GetBPM())
+// 	t = t + " BPM  "
+// 	m.c.display.WriteFrom(4, 8, t)
+// }
