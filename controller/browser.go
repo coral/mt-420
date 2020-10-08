@@ -65,7 +65,10 @@ func (m *Browser) Run(c *Controller, events <-chan string, end chan bool) string
 					if err != nil {
 						display.Error(c.display, err)
 					}
-					c.player.Play(files[selector.Value()].Name(), d)
+					err = c.player.Play(files[selector.Value()].Name(), d)
+					if err != nil {
+						display.Error(c.display, err)
+					}
 				}
 				renderEnd <- true
 				time.Sleep(50 * time.Millisecond)

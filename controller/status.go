@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"math"
 	"path/filepath"
 	"strconv"
@@ -96,7 +95,6 @@ func (m *Status) Name() string {
 func (m *Status) render() {
 	t := strconv.Itoa(m.c.player.GetBPM())
 	t = t + " BPM"
-	fmt.Println(t)
 	go display.RenderStatus(m.c.display,
 		display.StatusScreen{
 			Title: strings.TrimSuffix(
