@@ -15,7 +15,6 @@ type SoundFonts struct {
 
 func (m *SoundFonts) Run(c *Controller, events <-chan string, end chan bool) string {
 
-	c.display.SetColor(255, 255, 255)
 	update := make(chan bool, 1)
 	update <- true
 	files := m.listDir("files/soundfonts")

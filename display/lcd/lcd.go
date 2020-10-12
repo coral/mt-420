@@ -10,13 +10,13 @@ import (
 const eb = "                    "
 
 type LCD struct {
-	device       string
-	contrast     int
-	brightness   int
-	buffer       [4]string
-	serialConfig *serial.Config
-	conn         *serial.Port
-	lastrender   time.Time
+	device         string
+	contrast       int
+	brightness     int
+	buffer         [4]string
+	serialConfig   *serial.Config
+	conn           *serial.Port
+	lastFullRender time.Time
 }
 
 func New(device string) *LCD {
@@ -65,6 +65,17 @@ func (l *LCD) Init() error {
 	////Set backlight
 	s.Write([]byte{0xFE, 0xD0, 0xFF, 0xFF, 0x00})
 	time.Sleep(10 * time.Millisecond)
+
+	// This is just to clear out bad data that can happen from my threaded madness.
+	// NO MUTEX FIESTA
+	go func() {
+		for {
+			time.Sleep(100 * time.Millisecond)
+			if time.Now().Sub(l.lastFullRender).Seconds() > 5 {
+				l.Render()
+			}
+		}
+	}()
 
 	return nil
 }
@@ -135,8 +146,7 @@ func (l *LCD) WriteBuffer(newBuf [4]string) {
 
 	//Big change, full clear
 	l.buffer = newBuf
-	//l.Clear()
-	time.Sleep(5 * time.Millisecond)
+	l.lastFullRender = time.Now()
 	l.Render()
 
 }
@@ -166,8 +176,6 @@ func (l *LCD) Render() {
 		l.conn.Write([]byte(l.buffer[i]))
 		time.Sleep(6 * time.Millisecond)
 	}
-
-	l.lastrender = time.Now()
 
 }
 
