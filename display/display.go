@@ -21,8 +21,9 @@ type Device interface {
 func Message(d Device, message string) {
 
 	d.Clear()
-	d.ClearBuffer()
-	d.WriteAt(1, 1, message)
+	b := GetEmptyBuffer()
+	b[0] = message
+	d.WriteBuffer(b)
 }
 
 func Error(d Device, err error) {

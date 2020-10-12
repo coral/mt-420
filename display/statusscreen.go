@@ -30,6 +30,7 @@ func RenderStatus(d Device, s StatusScreen) {
 		buf[2] = " FLOPPY MIDI PLAYER"
 	}
 	d.WriteBuffer(buf)
+
 }
 
 func progressBar(x float64) string {

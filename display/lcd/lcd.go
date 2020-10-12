@@ -116,26 +116,26 @@ func (l *LCD) WriteBuffer(newBuf [4]string) {
 
 	//Short changelist, writing individual chars
 	if len(changes) < 10 {
-		for _, c := range changes {
-			l.WriteAt(c.line+1, c.pos, string(c.r))
-		}
 		l.buffer = newBuf
+		for _, c := range changes {
+			l.WriteAt(c.line+1, c.pos+1, string(c.r))
+		}
 		return
 	}
 
 	//Medium change, writing full screen
 	if len(changedLines) < 3 {
 
-		for _, line := range changedLines {
-			l.WriteAt(line+1, 0, string(newBuf[line]))
-		}
 		l.buffer = newBuf
+		for _, line := range changedLines {
+			l.WriteAt(line+1, 1, string(newBuf[line]))
+		}
 		return
 	}
 
 	//Big change, full clear
 	l.buffer = newBuf
-	l.Clear()
+	//l.Clear()
 	time.Sleep(5 * time.Millisecond)
 	l.Render()
 
@@ -150,19 +150,20 @@ func (l *LCD) ClearBuffer() {
 ///////////////////////////////////////////
 
 func (l *LCD) WriteAt(x int, y int, str string) {
-	bl := l.buffer[x-1][:y]
-	bl = bl + str
-	l.buffer[x-1] = bl
-	l.Render()
+
+	l.conn.Write([]byte{0xFE, 0x47, byte(y), byte(x)})
+	time.Sleep(6 * time.Millisecond)
+	l.conn.Write([]byte(str))
+
 }
 
 func (l *LCD) Render() {
-
 	//Jump to start
 	l.conn.Write([]byte{0xFE, 0x48})
 	time.Sleep(10 * time.Millisecond)
-	for _, val := range l.buffer {
-		l.conn.Write([]byte(l.trim(val)))
+	for i := range l.buffer {
+		l.buffer[i] = l.trim(l.buffer[i])
+		l.conn.Write([]byte(l.buffer[i]))
 		time.Sleep(6 * time.Millisecond)
 	}
 
