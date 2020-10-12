@@ -41,6 +41,8 @@ func (s *Selector) Value() int {
 }
 
 //Fuck Golang's lack of generics.
+//So dumb that I have to build this TWICE.
+//BIG PEPEGA https://www.youtube.com/watch?v=N2IIh3hHfkY
 
 type FloatSelector struct {
 	min   float64
