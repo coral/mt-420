@@ -67,8 +67,6 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 			return "status"
 		case ev := <-events:
 			switch ev {
-			case "play":
-				//c.player.Play("files/passport.mid")
 			case "encoderClick":
 				renderEnd <- true
 				return "browser"
@@ -106,9 +104,3 @@ func (m *Status) render() {
 		},
 	)
 }
-
-// func (m *Status) renderTempo() {
-// 	t := strconv.Itoa(m.c.player.GetBPM())
-// 	t = t + " BPM  "
-// 	m.c.display.WriteFrom(4, 8, t)
-// }
