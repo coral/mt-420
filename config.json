@@ -32,7 +32,7 @@
   "lcd": {
     "device": "/dev/lcd",
     "baud": 115200,
-    "bootdelay": 0,
+    "bootdelay": 1,
     "brightness": 255,
     "contrast": 255
   },
