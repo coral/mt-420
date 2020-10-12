@@ -13,6 +13,8 @@ var Options = map[string]Option{
 	"soundfonts": &SoundFonts{},
 	"settings":   &Settings{},
 	"volume":     &Volume{},
+	"contrast":   &Contrast{},
+	"brightness": &Brightness{},
 }
 
 type Controller struct {

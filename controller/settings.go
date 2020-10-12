@@ -55,7 +55,9 @@ func (m *Settings) Run(c *Controller, events <-chan string, end chan bool) strin
 				case "Soundfonts":
 					rt = "soundfonts"
 				case "Brightness":
+					rt = "brightness"
 				case "Contrast":
+					rt = "contrast"
 				case "Return to player":
 					rt = "status"
 				}
