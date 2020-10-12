@@ -35,21 +35,21 @@ func main() {
 
 	lcd.WriteBuffer(b)
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	lcd.WriteBuffer(b)
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	eb[0] = "HALKKKASFOJKF"
 
 	lcd.WriteBuffer(eb)
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	lcd.WriteAt(2, 3, "DENISSSSS")
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	display.Message(lcd, "HELLO BOYS")
 
@@ -83,7 +83,15 @@ func main() {
 		time.Sleep(800 * time.Millisecond)
 	}
 
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
+
+	display.RenderSlider(lcd, "INT", 25, 0, 100)
+
+	time.Sleep(2 * time.Second)
+
+	display.RenderFloatSlider(lcd, "FLOAT", 26.7, 0, 87.3)
+
+	time.Sleep(2 * time.Second)
 
 	display.Error(lcd, fmt.Errorf("KORV KORV"))
 
