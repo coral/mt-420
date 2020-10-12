@@ -1,23 +1,27 @@
 {
   "panel": {
-    "device": "/dev/panel",
+    "device": "/dev/cu.usbmodem142444201",
     "baud": 115200,
     "buttons": [
       {
         "name": "play",
-        "message": 36
+        "message": 32
+      },
+      {
+        "name": "pause",
+        "message": 33
       },
       {
         "name": "stop",
-        "message": 35
-      },
-      {
-        "name": "menu",
         "message": 34
       },
       {
+        "name": "menu",
+        "message": 35
+      },
+      {
         "name": "escape",
-        "message": 33
+        "message": 36
       },
       {
         "name": "encoderClick",
@@ -30,11 +34,11 @@
     }
   },
   "lcd": {
-    "device": "/dev/lcd",
+    "device": "/dev/cu.usbmodem142444401",
     "baud": 115200,
-    "bootdelay": 0,
     "brightness": 255,
-    "contrast": 255
+    "contrast": 255,
+    "bootdelay": 0
   },
   "fluidsynth": {
     "soundfonts": "files/soundfonts",
@@ -42,7 +46,7 @@
     "gain": 0.5
   },
   "floppy": {
-    "device": "/dev/sda",
+    "device": "/dev/sdb",
     "mountpoint": "/media/floppy"
   }
 }
