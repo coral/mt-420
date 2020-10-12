@@ -174,7 +174,7 @@ func (l *LCD) Render() {
 	for i := range l.buffer {
 		l.buffer[i] = l.trim(l.buffer[i])
 		l.conn.Write([]byte(l.buffer[i]))
-		time.Sleep(6 * time.Millisecond)
+		time.Sleep(8 * time.Millisecond)
 	}
 
 }
