@@ -155,9 +155,15 @@ func (p *Player) GetPlayingSong() string {
 			return p.filename
 		}
 	}
-
 	return ""
+}
 
+func (p *Player) SetGain(g float32) {
+	p.synth.SetGain(g)
+}
+
+func (p *Player) GetGain() float32 {
+	return p.synth.GetGain()
 }
 
 func (p *Player) GetState() string {

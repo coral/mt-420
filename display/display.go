@@ -15,7 +15,9 @@ type Device interface {
 
 	SetColor(r byte, g byte, b byte)
 	SetContrast(c int)
+	GetContrast() int
 	SetBrightness(b int)
+	GetBrightness() int
 }
 
 func Message(d Device, message string) {

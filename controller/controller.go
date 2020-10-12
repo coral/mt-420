@@ -11,6 +11,8 @@ var Options = map[string]Option{
 	"status":     &Status{},
 	"browser":    &Browser{},
 	"soundfonts": &SoundFonts{},
+	"settings":   &Settings{},
+	"volume":     &Volume{},
 }
 
 type Controller struct {

@@ -82,7 +82,7 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 				m.render()
 			case "menu":
 				renderEnd <- true
-				return "soundfonts"
+				return "settings"
 			}
 		}
 	}

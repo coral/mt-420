@@ -63,6 +63,12 @@ func (t *Terminal) SetColor(r byte, g byte, b byte) {
 func (t *Terminal) SetContrast(c int) {
 
 }
+func (t *Terminal) GetContrast() int {
+	return 0
+}
 func (t *Terminal) SetBrightness(b int) {
 
+}
+func (t *Terminal) GetBrightness() int {
+	return 0
 }

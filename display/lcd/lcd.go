@@ -192,12 +192,20 @@ func (l *LCD) SetContrast(c int) {
 	time.Sleep(10 * time.Millisecond)
 }
 
+func (l *LCD) GetContrast() int {
+	return l.contrast
+}
+
 func (l *LCD) SetBrightness(b int) {
 
 	l.brightness = b
 	//Set contrast
 	l.conn.Write([]byte{0xFE, 0x99, byte(l.brightness)})
 	time.Sleep(10 * time.Millisecond)
+}
+
+func (l *LCD) GetBrightness() int {
+	return l.brightness
 }
 
 ///////////////////////////////////////////
