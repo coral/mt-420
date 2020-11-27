@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 const eb = "                    "
@@ -49,7 +50,7 @@ func (t *Terminal) WriteAt(x int, y int, str string) {
 func (t *Terminal) Render() {
 	fmt.Printf("\033[0;0H")
 	for _, val := range t.buffer {
-		fmt.Println(val)
+		fmt.Println(t.trim(val))
 	}
 }
 func (t *Terminal) Clear() {
@@ -71,4 +72,24 @@ func (t *Terminal) SetBrightness(b int) {
 }
 func (t *Terminal) GetBrightness() int {
 	return 0
+}
+
+func (l *Terminal) trim(si string) string {
+	//If longer than 20, trim
+	if len(si) > 20 {
+		return si[0:20]
+	}
+	//If shorter than 20, extend
+	if len(si) < 20 {
+		var b strings.Builder
+		b.WriteString(si)
+		for i := 0; i < 20-len(si); i++ {
+			b.WriteString(" ")
+		}
+
+		return b.String()
+	}
+
+	//If 20, we gucchimucchi
+	return si
 }
