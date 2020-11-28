@@ -1,4 +1,4 @@
-# ATP MT-420
+# ATP MT-420 - MIDI FLOPPY PLAYBACK MACHINE
 
 [Video Demo](https://www.youtube.com/watch?v=jVcsk7LI_ug)
 
