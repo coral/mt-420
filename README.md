@@ -1,6 +1,6 @@
 # ATP MT-420
 
-[Video Demo](https://www.youtube.com/watch?v=WAGH1s5NdF4)
+[Video Demo](https://www.youtube.com/watch?v=jVcsk7LI_ug)
 
 [Read more about this on my blog](https://blog.jonasbengtson.se/mt-420)
 
