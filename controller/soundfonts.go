@@ -17,7 +17,7 @@ func (m *SoundFonts) Run(c *Controller, events <-chan string, end chan bool) str
 
 	update := make(chan bool, 1)
 	update <- true
-	files := m.listDir("files/soundfonts")
+	files := m.listDir(c.player.Config.SoundBank)
 
 	selector := NewSelector(0, 1, 0, len(files)-1)
 
