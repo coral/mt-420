@@ -70,15 +70,15 @@ func (l *LCD) Init() error {
 
 	// This is just to clear out bad data that can happen from my threaded madness.
 	// NO MUTEX FIESTA
-	go func() {
-		for {
-			time.Sleep(100 * time.Millisecond)
-			if time.Now().Sub(l.lastFullRender).Seconds() > 5 {
-				l.lastFullRender = time.Now()
-				l.Render()
-			}
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		time.Sleep(100 * time.Millisecond)
+	// 		if time.Now().Sub(l.lastFullRender).Seconds() > 5 {
+	// 			l.lastFullRender = time.Now()
+	// 			l.Render()
+	// 		}
+	// 	}
+	// }()
 
 	//Start the LCD rendering loop
 	go func() {
