@@ -72,11 +72,11 @@ func (m *Status) Run(c *Controller, events <-chan string, end chan bool) string 
 				return "browser"
 			case "encoderRight":
 				c.player.ChangeTempo(+5)
-				time.Sleep(10 * time.Millisecond)
+				time.Sleep(20 * time.Millisecond)
 				m.render()
 			case "encoderLeft":
 				c.player.ChangeTempo(-5)
-				time.Sleep(10 * time.Millisecond)
+				time.Sleep(20 * time.Millisecond)
 				m.render()
 			case "menu":
 				renderEnd <- true
