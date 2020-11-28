@@ -17,14 +17,16 @@ type LCD struct {
 	serialConfig   *serial.Config
 	conn           *serial.Port
 	lastFullRender time.Time
+	displayQueue   chan [4]string
 }
 
 func New(device string) *LCD {
 	return &LCD{
-		device:     device,
-		contrast:   255,
-		brightness: 255,
-		buffer:     [4]string{eb, eb, eb, eb},
+		device:       device,
+		contrast:     255,
+		brightness:   255,
+		buffer:       [4]string{eb, eb, eb, eb},
+		displayQueue: make(chan [4]string, 100),
 	}
 }
 
@@ -51,8 +53,8 @@ func (l *LCD) Init() error {
 	time.Sleep(10 * time.Millisecond)
 
 	//Autoscroll off
-	s.Write([]byte{0xFE, 0x52})
-	time.Sleep(10 * time.Millisecond)
+	//s.Write([]byte{0xFE, 0x52})
+	//time.Sleep(10 * time.Millisecond)
 
 	//Set Brightness
 	s.Write([]byte{0xFE, 0x99, byte(l.brightness)})
@@ -68,12 +70,21 @@ func (l *LCD) Init() error {
 
 	// This is just to clear out bad data that can happen from my threaded madness.
 	// NO MUTEX FIESTA
+	// go func() {
+	// 	for {
+	// 		time.Sleep(100 * time.Millisecond)
+	// 		if time.Now().Sub(l.lastFullRender).Seconds() > 5 {
+	// 			l.lastFullRender = time.Now()
+	// 			l.Render()
+	// 		}
+	// 	}
+	// }()
+
+	//Start the LCD rendering loop
 	go func() {
 		for {
-			time.Sleep(100 * time.Millisecond)
-			if time.Now().Sub(l.lastFullRender).Seconds() > 5 {
-				l.Render()
-			}
+			bf := <-l.displayQueue
+			l.internalWriteBuffer(bf)
 		}
 	}()
 
@@ -89,6 +100,10 @@ func (l *LCD) GetBuffer() [4]string {
 }
 
 func (l *LCD) WriteBuffer(newBuf [4]string) {
+	l.displayQueue <- newBuf
+}
+
+func (l *LCD) internalWriteBuffer(newBuf [4]string) {
 
 	// This function is mainly because the performance of the LCD backpack from
 	// Adafruit is absymal. For that reason I'm trying to be smart about how I
@@ -136,7 +151,6 @@ func (l *LCD) WriteBuffer(newBuf [4]string) {
 
 	//Medium change, writing full screen
 	if len(changedLines) < 3 {
-
 		l.buffer = newBuf
 		for _, line := range changedLines {
 			l.WriteAt(line+1, 1, string(newBuf[line]))
@@ -162,15 +176,16 @@ func (l *LCD) ClearBuffer() {
 func (l *LCD) WriteAt(x int, y int, str string) {
 
 	l.conn.Write([]byte{0xFE, 0x47, byte(y), byte(x)})
-	time.Sleep(6 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 	l.conn.Write([]byte(str))
 
 }
 
 func (l *LCD) Render() {
+
 	//Jump to start
 	l.conn.Write([]byte{0xFE, 0x48})
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(15 * time.Millisecond)
 	for i := range l.buffer {
 		l.buffer[i] = l.trim(l.buffer[i])
 		l.conn.Write([]byte(l.buffer[i]))
