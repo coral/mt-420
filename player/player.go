@@ -145,7 +145,7 @@ func (p *Player) GetBPM() int {
 
 func (p *Player) ChangeTempo(t int) {
 	v := p.fsPlayer.GetBPM()
-	p.fsPlayer.SetBPM(v + t)
+	p.fsPlayer.SetTempo(fluidsynth2.TEMPO_EXTERNAL_BPM, float64(v+t))
 }
 
 func (p *Player) GetPlayingSong() string {
